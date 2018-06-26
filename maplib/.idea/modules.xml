@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../AutoDrive.iml" filepath="$PROJECT_DIR$/../AutoDrive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../app/app.iml" filepath="$PROJECT_DIR$/../app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../jblelib/jblelib.iml" filepath="$PROJECT_DIR$/../jblelib/jblelib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/maplib.iml" filepath="$PROJECT_DIR$/maplib.iml" />
+    </modules>
+  </component>
+</project>

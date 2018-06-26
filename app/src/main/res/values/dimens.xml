@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="content_tv_sizi">18sp</dimen>
+    <dimen name="sp10">10sp</dimen>
+    <dimen name="sp8">8sp</dimen>
+    <dimen name="dp5">5dp</dimen>
+    <dimen name="sp_14">14sp</dimen>
+</resources>

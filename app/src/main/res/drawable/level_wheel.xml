@@ -1,0 +1,14 @@
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@mipmap/wheel_no_action"
+        android:maxLevel="0" />
+
+    <item
+        android:drawable="@mipmap/wheeel_auto_drive"
+        android:maxLevel="1" />
+
+    <item
+        android:drawable="@mipmap/wheel_temperature_alert"
+        android:maxLevel="2" />
+</level-list>

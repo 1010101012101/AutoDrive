@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">AutoDrive</string>
+    <string name="stop">停止</string>
+    <string name="new_work">新建</string>
+    <string name="no_loction_data">无定位数据</string>
+    <string name="please_set_ab_point">偏移功能需先设置AB点</string>
+    <string name="ble_connect_success">蓝牙连接成功!</string>
+    <string name="ab_inversion">AB点转换完成</string>
+    <string name="please_set_a">请设置A点</string>
+    <string name="new_work_set_ab">新建作业后才能设置AB点</string>
+    <string name="system_setting">系统设置</string>
+    <string name="offset_unit">偏移步长</string>
+    <string name="work_width">作业宽度</string>
+    <string name="signal_resource">差分信号源</string>
+    <string name="clear_data">清除数据</string>
+    <string name="about_this_device">有关本机</string>
+    <string name="work_parameter">工作参数</string>
+</resources>

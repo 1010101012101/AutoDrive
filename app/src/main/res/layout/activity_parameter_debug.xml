@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgcolor">
+    <include
+        android:id="@+id/toobar"
+        layout="@layout/toobar"></include>
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/shape_write"
+        android:elevation="2dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toobar">
+
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb1"
+            style="@style/RbStyle"
+            android:checked="true"
+            android:text="左电流参数" />
+
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb2"
+            style="@style/RbStyle"
+            android:text="右电流参数" />
+
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb3"
+            style="@style/RbStyle"
+            android:background="@drawable/sel_rb"
+            android:text="转角环参数" />
+
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb4"
+            style="@style/RbStyle"
+            android:text="航向环参数" />
+
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb5"
+            style="@style/RbStyle"
+            android:text="距离环参数" />
+    </RadioGroup>
+
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup"></android.support.v4.view.ViewPager>
+
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.icegps.autodrive">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".activity.ScanBleActivity"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.SensorActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.ParameterDebugActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.InsCalibrationActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.WorkSettingActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.SatelliteSignalActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.RadioActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity
+            android:name=".activity.SystemSettingActivity"
+            android:screenOrientation="landscape"></activity>
+
+        <activity
+            android:name=".activity.WorkWidthActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity
+            android:name=".activity.AddWorkWidthActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity
+            android:name=".activity.MapActivity"
+            android:screenOrientation="landscape"></activity>
+    </application>
+
+</manifest>
