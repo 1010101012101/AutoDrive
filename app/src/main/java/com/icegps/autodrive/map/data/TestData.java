@@ -21,7 +21,7 @@ import j.m.jblelib.ble.data.LocationStatus;
  * Created by 111 on 2018/2/26.
  */
 
-public class TestData {
+public class    TestData {
     private double[] bPos = new double[3];
     private double[] bECEF = new double[3];
     private double[] rPos = new double[3];

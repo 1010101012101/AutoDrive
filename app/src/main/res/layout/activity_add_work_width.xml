@@ -72,8 +72,9 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:gravity="center"
                 android:orientation="vertical">
 
                 <ImageView
@@ -84,20 +85,10 @@
                     android:src="@mipmap/tractors_width" />
 
                 <LinearLayout
-                    android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_marginTop="10dp">
-
-                    <TextView
-                        android:id="@+id/tv_tractors_hint"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="农具宽度:"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_tractors_value"
@@ -124,218 +115,93 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <EditText
-                    android:inputType="numberSigned|numberDecimal"
-                    android:id="@+id/et"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/et_bg"
-                    android:gravity="center" />
-
-                <TextView
-                    android:id="@+id/tv_confirm"
-                    android:layout_width="50dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/sel_btn_green"
-                    android:elevation="3dp"
-                    android:gravity="center"
-                    android:text="确定"
-                    android:textColor="#FFFFFF" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="15dp"
-            android:visibility="gone">
-
-
-            <LinearLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/iv_tractors2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@mipmap/tractors_left_right_offset" />
-
-                <LinearLayout
-                    android:layout_gravity="center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:id="@+id/tv_tractors_hint2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="铲斗偏移:"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/tv_tractors_value2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="0.00"
-                        android:textColor="#FF6464"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_tractors_unit2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="m"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <EditText
-                    android:inputType="numberSigned|numberDecimal"
-                    android:id="@+id/et2"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/et_bg"
-                    android:gravity="center" />
-
-                <TextView
-                    android:id="@+id/tv_confirm2"
-                    android:layout_width="50dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/sel_btn_green"
-                    android:elevation="3dp"
-                    android:gravity="center"
-                    android:text="确定"
-                    android:textColor="#FFFFFF" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="15dp"
-            android:visibility="gone">
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/iv_tractors3"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@mipmap/tractors_top_bottom_offset" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="作业宽度"
+                        android:textColor="#000000" />
+
+                    <EditText
+                        android:id="@+id/et"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@drawable/et_bg"
+                        android:gravity="center"
+                        android:hint="作业宽度"
+                        android:inputType="numberDecimal"
+                        android:textColor="#000000" />
+
+                </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_tractors_hint3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="左右偏移"
+                        android:textColor="#000000" />
+
+                    <EditText
+                        android:id="@+id/et1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="车身距后轴:"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
+                        android:layout_weight="1"
+                        android:background="@drawable/et_bg"
+                        android:gravity="center"
+                        android:hint="左右偏移"
+                        android:inputType="numberDecimal" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_tractors_value3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="0.00"
-                        android:textColor="#FF6464"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="到后轴距离"
+                        android:textColor="#000000" />
 
-                    <TextView
-                        android:id="@+id/tv_tractors_unit3"
-                        android:layout_width="wrap_content"
+                    <EditText
+                        android:id="@+id/et2"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_toLeftOf="@+id/iv_tractors"
-                        android:text="m"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
+                        android:layout_weight="1"
+                        android:background="@drawable/et_bg"
+                        android:gravity="center"
+                        android:hint="到后轴距离"
+                        android:inputType="numberDecimal" />
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <EditText
-                    android:inputType="numberSigned|numberDecimal"
-                    android:id="@+id/et3"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/et_bg"
-                    android:gravity="center" />
-
-                <TextView
-                    android:id="@+id/tv_confirm3"
-                    android:layout_width="50dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/sel_btn_green"
-                    android:elevation="3dp"
-                    android:gravity="center"
-                    android:text="确定"
-                    android:textColor="#FFFFFF" />
-            </LinearLayout>
         </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

@@ -506,13 +506,13 @@ class MarkAbPoint(mapHelper: MapHelper) {
      * 平滑旋转
      */
     private fun smoothRotate(adjust: Float) {
-        ThreadPool.getInstance().executeSingle(Runnable {
-            for (i in 0 until rotateAnimaTime) {
-                rotateDegress += adjust / rotateAnimaTime
-                SystemClock.sleep(1)
-                mapHelper.requestRefreshUi()
-            }
-        })
+//        ThreadPool.getInstance().executeSingle(Runnable {
+//            for (i in 0 until rotateAnimaTime) {
+//                rotateDegress += adjust / rotateAnimaTime
+//                SystemClock.sleep(1)
+//                mapHelper.requestRefreshUi()
+//            }
+//        })
     }
 
     /**

@@ -38,7 +38,7 @@
             android:id="@+id/rb3"
             style="@style/RbStyle"
             android:background="@drawable/sel_rb"
-            android:text="阀值校准" />
+            android:text="阈值校准" />
 
     </RadioGroup>
 

@@ -9,6 +9,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.icegps.autodrive.R;
 import com.icegps.autodrive.data.WorkWidth;
+import com.icegps.autodrive.utils.StringUtils;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class WorkWidthAdapter extends BaseQuickAdapter<WorkWidth, BaseViewHolder
             helper.setVisible(R.id.iv_add, true);
         } else {
             helper
-                    .setText(R.id.tv_work_width, item.workWidth + "")
+                    .setText(R.id.tv_work_width, StringUtils.Companion.setAccuracy(item.workWidth, 2) + "")
                     .setText(R.id.tv_work_name, item.workName)
                     .setText(R.id.tv_wrok_unit, "m")
                     .setVisible(R.id.iv_add, false);

@@ -4,54 +4,65 @@ import android.os.Bundle
 import android.support.annotation.IntegerRes
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.AbsListView
+import android.widget.NumberPicker
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
 import com.icegps.autodrive.R
 import com.icegps.autodrive.R.id.*
-import com.icegps.autodrive.adapter.RadioAdapter
 import com.icegps.autodrive.ble.BleWriteHelper
 import com.icegps.autodrive.ble.Cmds
 import com.icegps.autodrive.ble.OnlyBle
 import com.icegps.autodrive.ble.ParseDataBean
+import com.tencent.bugly.proguard.s
 import kotlinx.android.synthetic.main.activity_radio.*
+import kotlinx.android.synthetic.main.activity_radio.view.*
 import kotlinx.android.synthetic.main.toobar.*
 
 class RadioActivity : BaseActivity() {
-    private var radios: ArrayList<Int> = ArrayList()
-    private lateinit var radioAdapter: RadioAdapter
+    private var radios: ArrayList<String> = ArrayList()
+    private lateinit var s: Array<String?>
+    private var currentRadio = 1
     override fun layout(): Int {
         return R.layout.activity_radio
     }
 
 
     override fun init() {
-        for (i in 1..8) {
-            radios.add(i)
+        for (i in 1..48) {
+            var value = i.toString()
+            if (value.length < 2) {
+                value = "0" + value
+            }
+            radios.add(value)
         }
-        var llm = LinearLayoutManager(activity)
-        recyclerView.setLayoutManager(llm)
-        radioAdapter = RadioAdapter(R.layout.item_radio, radios)
-        recyclerView.adapter = radioAdapter
         OnlyBle.addOnParseCompleteCallback(onParseComplete)
         BleWriteHelper.writeCmd(Cmds.GETRADIO)
+        s = arrayOfNulls<String>(radios.size)
+        radios.toArray(s)
+        numberPickerView.setDisplayedValues(s, false)
+        numberPickerView.maxValue = radios.size - 1
+
 
     }
 
     override fun setListener() {
-        radioAdapter.setOnItemClickListener({ baseQuickAdapter: BaseQuickAdapter<Any, BaseViewHolder>, view: View, i: Int ->
-            RadioAdapter.selItem = i + 1
-            BleWriteHelper.writeCmd(Cmds.SETRADIO , RadioAdapter.selItem.toString())
-            radioAdapter.notifyDataSetChanged()
-        })
         tv_title.setText("数传频道")
         iv_left.setOnClickListener { finish() }
+        numberPickerView.setOnScrollListener { view, scrollState ->
+            if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
+                BleWriteHelper.writeCmd(Cmds.SETRADIO, numberPickerView.contentByCurrValue)
+            }
+        }
+
     }
 
     var onParseComplete = object : OnlyBle.OnParseComplete {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {
-            if (RadioAdapter.selItem != parseDataBean!!.radio.current) {
-                RadioAdapter.selItem = parseDataBean!!.radio.current
-                radioAdapter.notifyDataSetChanged()
+            val current = parseDataBean!!.radio.current
+            if (current != currentRadio) {
+                currentRadio=current
+                numberPickerView.value = current - 1
             }
         }
     }

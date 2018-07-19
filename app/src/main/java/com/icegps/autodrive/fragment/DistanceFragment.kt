@@ -1,5 +1,6 @@
 package com.icegps.autodrive.fragment
 
+import android.support.design.widget.Snackbar
 import android.text.TextUtils
 import android.view.View
 import android.widget.CompoundButton
@@ -9,6 +10,7 @@ import com.icegps.autodrive.ble.Cmds
 import com.icegps.autodrive.ble.ParseDataBean
 import com.icegps.autodrive.map.utils.LatLonUtils
 import com.icegps.autodrive.utils.Init
+import com.icegps.autodrive.utils.Init.Companion.showToast
 import j.m.jblelib.ble.BleHelper
 import j.m.jblelib.ble.BleStatusCallBackImpl.BleStatusCallBackImpl
 import j.m.jblelib.ble.data.LocationStatus
@@ -53,7 +55,7 @@ class DistanceFragment : BaseFragment() {
 
         contentView.tv_get_a.setOnClickListener({
             if (contentView.tv_test.isChecked) {
-                Init.showToast("正在测试中,请不要重复操作")
+                showSnackbar("正在测试中,请不要重复操作")
                 return@setOnClickListener
             }
             if (locationStatus != null) {
@@ -63,15 +65,18 @@ class DistanceFragment : BaseFragment() {
                 locationStatusA.y = locationStatus!!.y
                 locationStatusA.latitude = locationStatus!!.latitude
                 locationStatusA.longitude = locationStatus!!.longitude
+                showSnackbar("A点设置成功")
+            } else {
+                showSnackbar("未获取到定位数据")
             }
         })
         contentView.tv_get_b.setOnClickListener({
             if (contentView.tv_test.isChecked) {
-                Init.showToast("正在测试中,请不要重复操作")
+                showSnackbar("正在测试中,请不要重复操作")
                 return@setOnClickListener
             }
             if (!contentView.tv_tag_a.isSelected) {
-                Init.showToast("请先记录A点")
+                showSnackbar("请先记录A点")
                 return@setOnClickListener
             }
             if (locationStatus != null) {
@@ -81,11 +86,14 @@ class DistanceFragment : BaseFragment() {
                 locationStatusB.y = locationStatus!!.y
                 locationStatusB.latitude = locationStatus!!.latitude
                 locationStatusB.longitude = locationStatus!!.longitude
+                showSnackbar("B点设置成功")
+            } else {
+                showSnackbar("未获取到定位数据")
             }
         })
 
         contentView.tv_test.setOnCheckedChangeListener({ compoundButton: CompoundButton, b: Boolean ->
-            if (locationStatus != null) {
+            if (contentView.tv_tag_a.isSelected && contentView.tv_tag_b.isSelected) {
                 angle = Math.toDegrees(Math.atan2(
                         locationStatusB.x - locationStatusA.x,
                         locationStatusB.y - locationStatusA.y))
@@ -100,13 +108,14 @@ class DistanceFragment : BaseFragment() {
                     sendTest("0", "0")
                     contentView.tv_tag_a.isSelected = false
                     contentView.tv_tag_b.isSelected = false
-                    contentView.tv_tag_a.visibility = View.INVISIBLE
-                    contentView.tv_tag_b.visibility = View.INVISIBLE
+                    contentView.tv_tag_a.visibility = View.GONE
+                    contentView.tv_tag_b.visibility = View.GONE
                 }
+            } else {
+                contentView.tv_test.isChecked = false
+                showSnackbar("请先设置AB点")
             }
         })
-
-
     }
 
     override fun childImplView(): View {
@@ -119,11 +128,20 @@ class DistanceFragment : BaseFragment() {
     var bleStatusCallBackImpl = object : BleStatusCallBackImpl() {
         override fun onLocationData(locationStatus: LocationStatus) {
             super.onLocationData(locationStatus)
-            val latLon2Xy = LatLonUtils.latLon2Xy(doubleArrayOf(locationStatus.latitude, locationStatus.longitude, locationStatus.altitude))
-            this@DistanceFragment.locationStatus!!.x = latLon2Xy[0]
-            this@DistanceFragment.locationStatus!!.y = latLon2Xy[1]
+//            val latLon2Xy = LatLonUtils.latLon2Xy(doubleArrayOf(locationStatus.latitude, locationStatus.longitude, locationStatus.altitude))
+//            if (this@DistanceFragment.locationStatus==null){
+//                this@DistanceFragment.locationStatus=LocationStatus()
+//            }
+//            this@DistanceFragment.locationStatus?.x = latLon2Xy[0]
+//            this@DistanceFragment.locationStatus?.y = latLon2Xy[1]
+            this@DistanceFragment.locationStatus=locationStatus
         }
     }
 
+
+    fun showSnackbar(content:String) {
+        Snackbar.make(contentView,content,1000).show()
+
+    }
 
 }

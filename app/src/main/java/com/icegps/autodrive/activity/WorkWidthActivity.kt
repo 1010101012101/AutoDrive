@@ -2,6 +2,7 @@ package com.icegps.autodrive.activity
 
 import android.content.Intent
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import com.icegps.autodrive.R
 import com.icegps.autodrive.R.id.*
 import com.icegps.autodrive.adapter.WorkWidthAdapter
@@ -19,9 +20,9 @@ class WorkWidthActivity : BaseActivity() {
 
     override fun init() {
         tv_title.setText(resources.getString(R.string.work_width))
-        workWidthAdapter=WorkWidthAdapter(R.layout.item_work_width,workWidths,activity)
+        workWidthAdapter = WorkWidthAdapter(R.layout.item_work_width, workWidths, activity)
         val gridLayoutManager = GridLayoutManager(activity, 3)
-        recyclerView.layoutManager = gridLayoutManager
+        recyclerView.layoutManager = gridLayoutManager as RecyclerView.LayoutManager?
         recyclerView.adapter = workWidthAdapter
     }
 
@@ -29,32 +30,26 @@ class WorkWidthActivity : BaseActivity() {
         super.onResume()
         refresh()
     }
+
     override fun setListener() {
         iv_left.setOnClickListener { finish() }
         workWidthAdapter.setOnItemClickListener { adapter, view, position ->
-            if (position==workWidths.size-1){
-             startActivity(Intent(activity,AddWorkWidthActivity::class.java))
+            if (position <= workWidths.size - 1) {
+                val intent = Intent(activity, AddWorkWidthActivity::class.java)
+                intent.putExtra("id", workWidths.get(position).id)
+                startActivity(intent)
             }
         }
     }
 
 
-    fun refresh(){
+    fun refresh() {
         val loadAll = GreenDaoUtils.daoSession.workWidthDao.loadAll()
         workWidths.clear()
-        if (loadAll == null||loadAll.size==0) {
-            workWidths.add(WorkWidth(0f,"播种",0))
-            workWidths.add(WorkWidth(0f,"打药",0))
-            workWidths.add(WorkWidth(0f,"施肥",0))
-            workWidths.add(WorkWidth(0f,"开沟",0))
-            workWidths.add(WorkWidth(0f,"犁地",0))
-        }else{
-            workWidths.addAll(loadAll)
-        }
+        workWidths.addAll(loadAll)
         workWidthAdapter.notifyDataSetChanged()
 
-        workWidths.add(WorkWidth())
-
+//        workWidths.add(WorkWidth())   加号
 
 
     }

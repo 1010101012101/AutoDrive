@@ -33,25 +33,30 @@ public class SystemSettingAdapter extends BaseQuickAdapter<String, BaseViewHolde
         Drawable drawable=null;
         switch (helper.getPosition()){
             case 0:
-                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_work_width);
-
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_radio);
                 break;
             case 1:
-                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_differential_source);
-
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_work_width);
                 break;
             case 2:
-                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_clear_data);
-
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_differential_source);
                 break;
             case 3:
-                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_about);
-
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_clear_data);
                 break;
             case 4:
-                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_work_parameter);
-
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_about);
                 break;
+            case 5:
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_factory_calibration);
+                break;
+            case 6:
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_work_parameter);
+                break;
+            case 7:
+                drawable= ContextCompat.getDrawable(context,R.mipmap.menu_work_parameter);
+                break;
+
         }
 
         helper.setText(R.id.tv_menu,item).setImageDrawable(R.id.iv_menu,drawable);

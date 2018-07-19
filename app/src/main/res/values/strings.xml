@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AutoDrive</string>
+    <string name="app_name">冰河自驾</string>
     <string name="stop">停止</string>
     <string name="new_work">新建</string>
     <string name="no_loction_data">无定位数据</string>
@@ -14,5 +14,8 @@
     <string name="signal_resource">差分信号源</string>
     <string name="clear_data">清除数据</string>
     <string name="about_this_device">有关本机</string>
-    <string name="work_parameter">工作参数</string>
+    <string name="factory_calibration">出厂校准</string>
+    <string name="control_parameter_calibration">控制参数校准</string>
+    <string name="ins_calibration">安装校准</string>
+    <string name="radio">数传频道</string>
 </resources>

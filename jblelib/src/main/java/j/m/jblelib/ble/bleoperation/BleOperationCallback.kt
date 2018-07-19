@@ -8,6 +8,7 @@ import j.m.jblelib.ble.callback.BleCallbackManager
 import j.m.jblelib.ble.data.BleDevice
 import j.m.jblelib.ble.failmsg.FailMsg
 import j.m.jblelib.ble.utils.BleLog
+import java.util.*
 
 /**
  * Created by 111 on 2018/4/19.
@@ -25,11 +26,16 @@ object BleOperationCallback {
                             "onConnectSuccess",
                             if (gatt!!.device.name == null) "null" else gatt.device.name,
                             if (gatt.device.address == null) "null" else gatt.device.address)
-                    val bleDevice = BleDevice(gatt.device.name, gatt.device.address)
-                    bleDevice.gatt = gatt;
-                    BleConnectedDevice.connectBleDevices.put(bleDevice.mac!!, bleDevice)
-                    BleCallbackManager.callback(BleCallbackManager.CONNECT_SUCCESS, bleDevice)
-                    gatt.discoverServices()
+                    Timer().schedule(object : TimerTask() {
+                        override fun run() {
+                            val bleDevice = BleDevice(gatt.device.name, gatt.device.address)
+                            bleDevice.gatt = gatt;
+                            BleConnectedDevice.connectBleDevices.put(bleDevice.mac!!, bleDevice)
+                            BleCallbackManager.callback(BleCallbackManager.CONNECT_SUCCESS, bleDevice)
+                            gatt.discoverServices()
+                        }
+                    }, 1000)
+
                 }
 
                 BluetoothGatt.STATE_DISCONNECTED -> {

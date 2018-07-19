@@ -1,12 +1,14 @@
 package com.icegps.autodrive.activity
 
 import android.animation.ObjectAnimator
+import android.app.ProgressDialog.show
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
-import android.os.Bundle
+import android.graphics.drawable.ColorDrawable
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.EditText
 import com.icegps.autodrive.R
@@ -25,13 +27,22 @@ import j.m.jblelib.ble.failmsg.FailMsg
 import kotlinx.android.synthetic.main.activity_map_view.*
 import java.util.*
 import android.text.InputType
+import android.view.ViewGroup
+import android.widget.PopupWindow
 import com.icegps.autodrive.R.id.*
+import com.icegps.autodrive.adapter.WorkModeAdapter
 import com.icegps.autodrive.ble.ParseDataBean
 import com.icegps.autodrive.utils.Init
-import kotlinx.android.synthetic.main.activity_add_work_width.*
+import kotlinx.android.synthetic.main.dialog_new_work.view.*
+import com.icegps.autodrive.data.WorkWidth
+import com.icegps.autodrive.gen.GreenDaoUtils
+import kotlinx.android.synthetic.main.item_device.view.*
+import kotlinx.android.synthetic.main.pop_work_mode.view.*
 
 
 class MapActivity : BaseActivity() {
+    private var selMode = 0
+
     override fun layout(): Int {
         return R.layout.activity_map_view
     }
@@ -43,6 +54,12 @@ class MapActivity : BaseActivity() {
     private var mac = ""
     private var autoOrManual = 0
 
+    var dialog: AlertDialog? = null
+    var workModeContentView: View? = null
+    var popWorkModeView: View? = null
+    var workModeAdapter: WorkModeAdapter? = null
+    var popupWindow: PopupWindow? = null
+    var width = 3f
 
     override fun init() {
         setIvABEnab(false)
@@ -66,6 +83,24 @@ class MapActivity : BaseActivity() {
          */
         OnlyBle.register()
         testData()
+        workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
+        workModeContentView = View.inflate(this, R.layout.dialog_new_work, null)
+        popWorkModeView = View.inflate(this, R.layout.pop_work_mode, null)
+
+        dialog = AlertDialog.Builder(this).create()
+        dialog!!.setView(workModeContentView)
+
+        if (workWidths != null) {
+            workModeAdapter = WorkModeAdapter(R.layout.item_work_mode, workWidths, this)
+            popWorkModeView!!.recyclerView.layoutManager = LinearLayoutManager(this)
+            popWorkModeView!!.recyclerView.adapter = workModeAdapter
+        }
+
+        popupWindow = PopupWindow(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        popupWindow!!.isOutsideTouchable = true
+        popupWindow!!.setBackgroundDrawable(ColorDrawable())
+        popupWindow!!.contentView = popWorkModeView
+
     }
 
     private fun initBleCmd() {
@@ -78,14 +113,14 @@ class MapActivity : BaseActivity() {
 
     private fun testData() {
         testData = TestData()
-        testData!!.getTestData {
-            mapHelper.run(locationStatus = it)
-        }
+//        testData!!.getTestData {
+//            mapHelper.run(locationStatus = it)
+//        }
     }
 
     override fun setListener() {
         iv_wheel.setOnClickListener {
-            BleWriteHelper.writeCmd(Cmds.SETWORKS, "1", if (autoOrManual == 1) "0" else "1")
+            BleWriteHelper.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
         }
 
         OnlyBle.addOnParseCompleteCallback(onParseComplete)
@@ -94,39 +129,19 @@ class MapActivity : BaseActivity() {
 
         mapHelper.addCallback(mapCallbackImpl)
 
-        tv_view_change.setOnClickListener {
-            var et = EditText(this)
-            et.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            val builder = AlertDialog.Builder(this)
-            builder.setMessage("设置农具宽度")
-                    .setView(et)
-                    .setPositiveButton("确定", { dialogInterface: DialogInterface, i: Int ->
-                        val workWidth = et.text.toString().toFloat()
-                        mapHelper.workWidth = workWidth
-                        Init.showToast("农具宽度设置成功!")
-                    })
-                    .setNegativeButton("取消", { dialogInterface: DialogInterface, i: Int -> })
-                    .show()
-        }
 
         tv_signal.setOnClickListener { startActivity(Intent(activity, SatelliteSignalActivity::class.java)) }
 
         tv_setting.setOnClickListener { startActivity(Intent(activity, SystemSettingActivity::class.java)) }
-        tv_work.setOnClickListener {
 
-        }
+        tv_work.setOnClickListener {}
 
         tv_start_or_stop_work.setOnClickListener {
             when (tv_start_or_stop_work.isSelected) {
-                false -> {   //开始工作
-                    ll_ab_point.visibility = View.VISIBLE
-                    setIvABEnab(true)
-                    mapHelper.startWork()
-                    tv_start_or_stop_work.isSelected = true
-                    tv_start_or_stop_work.setText(getString(R.string.stop))
-                    setTvHintStr(getString(R.string.please_set_a))
+                false -> {
+                    dialog!!.show()
                 }
-                true -> {  //停止工作
+                true -> {
                     ll_ab_point.visibility = View.VISIBLE
                     isMarkBPoint = false
                     mapHelper.stopWork()
@@ -137,6 +152,41 @@ class MapActivity : BaseActivity() {
                 }
             }
         }
+        workModeContentView!!.tv_sel_work_mode.setOnClickListener {
+            popupWindow!!.showAsDropDown(workModeContentView!!.tv_sel_work_mode)
+        }
+        workModeContentView!!.iv_sel_work_mode.setOnClickListener {
+            popupWindow!!.showAsDropDown(workModeContentView!!.tv_sel_work_mode)
+        }
+
+        workModeContentView!!.tv_cancel.setOnClickListener {
+            dialog!!.dismiss()
+        }
+        workModeContentView!!.tv_confirm.setOnClickListener {
+            if (width == 0f) {
+                Init.showToast("当前作业宽度为0,请先进入设置界面设置作业宽度")
+                dialog!!.dismiss()
+                return@setOnClickListener
+            }
+            mapHelper.workWidth = width
+            dialog!!.dismiss()
+            ll_ab_point.visibility = View.VISIBLE
+            setIvABEnab(true)
+            mapHelper.startWork()
+            tv_start_or_stop_work.isSelected = true
+            tv_start_or_stop_work.setText(getString(R.string.stop))
+            setTvHintStr(getString(R.string.please_set_a))
+
+        }
+
+        workModeAdapter!!.setOnItemClickListener { adapter, view, position ->
+            workModeContentView!!.tv_sel_work_mode.setText(workWidths!!.get(position).workName)
+            workModeContentView!!.tv_width.setText(workWidths!!.get(position).workWidth.toString())
+            popupWindow!!.dismiss()
+            width = workWidths!!.get(position).workWidth
+            selMode = position
+        }
+
 
         iv_set_a_point.setOnClickListener {
             markAPoint()
@@ -177,6 +227,15 @@ class MapActivity : BaseActivity() {
         }
 
     }
+
+    private var workWidths: List<WorkWidth>? = null
+    override fun onResume() {
+        super.onResume()
+        workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
+        workModeAdapter!!.notifyDataSetChanged()
+        workModeContentView?.tv_width?.setText(workWidths!!.get(selMode)!!.workWidth.toString())
+    }
+
 
     /**
      * 设置蓝牙图标的状态
@@ -312,6 +371,11 @@ class MapActivity : BaseActivity() {
         mapHelper.removeCallback(mapCallbackImpl)
     }
 
+    override fun onPause() {
+        super.onPause()
+        BleWriteHelper.writeCmd(Cmds.AUTO, "0")
+    }
+
 
     /**
      * 蓝牙数据监听
@@ -342,12 +406,18 @@ class MapActivity : BaseActivity() {
             super.onDisConnect(isManualDis)
             setIvBleStatus(0)
             BleHelper.connect(mac)
+            if (bleIvAnima != null) {
+                bleIvAnima!!.cancel()
+            }
         }
 
         override fun onConnectFail(failMsg: FailMsg) {
             super.onConnectFail(failMsg)
             setIvBleStatus(0)
             BleHelper.connect(mac)
+            if (bleIvAnima != null) {
+                bleIvAnima!!.cancel()
+            }
         }
 
         override fun onLocationData(locationStatus: LocationStatus) {
@@ -383,6 +453,9 @@ class MapActivity : BaseActivity() {
                 locationStatus.color = Color.parseColor("#770000FF")
             })
 
+            if (d > 10) {
+                BleWriteHelper.writeCmd(Cmds.AUTO, "0")
+            }
             mapHelper.run(locationStatus)
         }
     }
@@ -400,7 +473,6 @@ class MapActivity : BaseActivity() {
         }
     }
 
-
     private var onParseComplete = object : OnlyBle.OnParseComplete {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {
             autoOrManual(parseDataBean!!.workStatus.workMode)
@@ -408,8 +480,23 @@ class MapActivity : BaseActivity() {
                 autoOrManual = parseDataBean!!.workStatus.workMode
                 iv_wheel.drawable.setLevel(autoOrManual)
             }
+            val offset = parseDataBean.workStatus.distanceOffset
+            if (offset != null) {
+                tv_offset.setText(offset.toInt().toString())
+                setOffsetIv(offset)
+            }
         }
+    }
 
+
+    private fun setOffsetIv(offset: Float) {
+        iv_left_offset_green.visibility = if (offset < 0 && offset >= -2) View.VISIBLE else View.INVISIBLE
+        iv_left_offset_yellow.visibility = if (offset < -2 && offset >= -4) View.VISIBLE else View.INVISIBLE
+        iv_left_offset_red.visibility = if (offset < -4) View.VISIBLE else View.INVISIBLE
+
+        iv_right_offset_green.visibility = if (offset > 0 && offset <= 2) View.VISIBLE else View.INVISIBLE
+        iv_right_offset_yellow.visibility = if (offset > 2 && offset <= 4) View.VISIBLE else View.INVISIBLE
+        iv_right_offset_red.visibility = if (offset > 4) View.VISIBLE else View.INVISIBLE
     }
 
 

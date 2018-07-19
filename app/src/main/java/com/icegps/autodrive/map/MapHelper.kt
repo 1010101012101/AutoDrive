@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.graphics.*
 import com.icegps.autodrive.R
+import com.icegps.autodrive.ble.BleWriteHelper
 import com.icegps.autodrive.map.data.ColorRes
 import com.icegps.autodrive.map.data.PointMark
 import com.icegps.autodrive.map.listener.MapCallback
@@ -12,6 +13,7 @@ import com.icegps.autodrive.map.utils.TileUtils
 import com.icegps.autodrive.utils.DisplayUtils
 import icegps.com.maplib.map.Helper
 import icegps.com.maplib.map.mapdata.BitmapLruCache
+import j.m.jblelib.ble.bleoperation.BleWrite
 import j.m.jblelib.ble.data.LocationStatus
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -178,6 +180,7 @@ class MapHelper(context: Context) : Helper() {
      * 设置A点
      */
     fun markAPoint(): Boolean {
+        if (locationStatus==null)return false
         return markAbPoint.markAPoint(locationStatus!!)
     }
 
@@ -185,6 +188,7 @@ class MapHelper(context: Context) : Helper() {
      * 设置B点
      */
     fun markBPoint(): Boolean {
+        if (locationStatus==null)return false
         return markAbPoint.markBPoint(locationStatus!!)
     }
 

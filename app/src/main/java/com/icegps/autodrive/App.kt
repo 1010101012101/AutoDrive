@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import com.icegps.autodrive.ble.OnlyBle
+import com.icegps.autodrive.data.WorkWidth
 import com.icegps.autodrive.gen.GreenDaoUtils
 import com.icegps.autodrive.utils.Init
 import com.tencent.bugly.crashreport.CrashReport
@@ -26,14 +27,24 @@ class App : Application() {
         BleHelper.init(this, serviceUUID, notifyUUID, writeUUID, false)
         CrashReport.initCrashReport(this, "cdf90effad", false);
         GreenDaoUtils.initGrrenDaoUtils(this)
+
+
+        var loadAll = GreenDaoUtils.daoSession.workWidthDao.loadAll()
+        if (loadAll == null || loadAll.size == 0) {
+            loadAll = ArrayList()
+            loadAll.add(WorkWidth(3f, 0f, 0f, "播种", 0))
+            loadAll.add(WorkWidth(3f, 0f, 0f, "打药", 1))
+            loadAll.add(WorkWidth(3f, 0f, 0f, "施肥", 2))
+            loadAll.add(WorkWidth(3f, 0f, 0f, "开沟", 3))
+            loadAll.add(WorkWidth(3f, 0f, 0f, "犁地", 4))
+            GreenDaoUtils.daoSession.workWidthDao.insertOrReplaceInTx(loadAll)
+        }
     }
 
     override fun onTerminate() {
         super.onTerminate()
         OnlyBle.unregister()
     }
-
-
 
 
 }

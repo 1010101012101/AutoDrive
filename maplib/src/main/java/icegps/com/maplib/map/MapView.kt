@@ -134,6 +134,8 @@ class MapView(context: Context?, attrs: AttributeSet?) : SurfaceView(context, at
             isConsideredDoubleTap = true
             return true
         }
+
+
     }
     /**.
      * surfaceCallback

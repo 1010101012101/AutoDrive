@@ -17,7 +17,6 @@ public class Sp {
     private static SharedPreferences sharedPreferences;
 
     private Sp() {
-
     }
 
     public static Sp getInstance() {

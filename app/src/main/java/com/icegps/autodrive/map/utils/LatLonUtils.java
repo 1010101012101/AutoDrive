@@ -250,6 +250,7 @@ public class LatLonUtils {
         enu = ecef2enu(bPos, vECEF);
         double x = (enu[0] * 2);
         double y = -(enu[1] * 2);
+//        double y = -(enu[1] * 2);
         double altitudeDifference = enu[2];
 
         return new double[]{x, y, altitudeDifference};

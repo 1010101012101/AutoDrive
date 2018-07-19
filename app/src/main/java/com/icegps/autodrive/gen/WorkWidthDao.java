@@ -25,8 +25,10 @@ public class WorkWidthDao extends AbstractDao<WorkWidth, Long> {
      */
     public static class Properties {
         public final static Property WorkWidth = new Property(0, float.class, "workWidth", false, "WORK_WIDTH");
-        public final static Property WorkName = new Property(1, String.class, "workName", false, "WORK_NAME");
-        public final static Property Id = new Property(2, Long.class, "id", true, "_id");
+        public final static Property Offset = new Property(1, float.class, "offset", false, "OFFSET");
+        public final static Property Distance = new Property(2, float.class, "distance", false, "DISTANCE");
+        public final static Property WorkName = new Property(3, String.class, "workName", false, "WORK_NAME");
+        public final static Property Id = new Property(4, Long.class, "id", true, "_id");
     }
 
 
@@ -43,8 +45,10 @@ public class WorkWidthDao extends AbstractDao<WorkWidth, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"WORK_WIDTH\" (" + //
                 "\"WORK_WIDTH\" REAL NOT NULL ," + // 0: workWidth
-                "\"WORK_NAME\" TEXT," + // 1: workName
-                "\"_id\" INTEGER PRIMARY KEY );"); // 2: id
+                "\"OFFSET\" REAL NOT NULL ," + // 1: offset
+                "\"DISTANCE\" REAL NOT NULL ," + // 2: distance
+                "\"WORK_NAME\" TEXT," + // 3: workName
+                "\"_id\" INTEGER PRIMARY KEY );"); // 4: id
     }
 
     /** Drops the underlying database table. */
@@ -57,15 +61,17 @@ public class WorkWidthDao extends AbstractDao<WorkWidth, Long> {
     protected final void bindValues(DatabaseStatement stmt, WorkWidth entity) {
         stmt.clearBindings();
         stmt.bindDouble(1, entity.getWorkWidth());
+        stmt.bindDouble(2, entity.getOffset());
+        stmt.bindDouble(3, entity.getDistance());
  
         String workName = entity.getWorkName();
         if (workName != null) {
-            stmt.bindString(2, workName);
+            stmt.bindString(4, workName);
         }
  
         Long id = entity.getId();
         if (id != null) {
-            stmt.bindLong(3, id);
+            stmt.bindLong(5, id);
         }
     }
 
@@ -73,29 +79,33 @@ public class WorkWidthDao extends AbstractDao<WorkWidth, Long> {
     protected final void bindValues(SQLiteStatement stmt, WorkWidth entity) {
         stmt.clearBindings();
         stmt.bindDouble(1, entity.getWorkWidth());
+        stmt.bindDouble(2, entity.getOffset());
+        stmt.bindDouble(3, entity.getDistance());
  
         String workName = entity.getWorkName();
         if (workName != null) {
-            stmt.bindString(2, workName);
+            stmt.bindString(4, workName);
         }
  
         Long id = entity.getId();
         if (id != null) {
-            stmt.bindLong(3, id);
+            stmt.bindLong(5, id);
         }
     }
 
     @Override
     public Long readKey(Cursor cursor, int offset) {
-        return cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2);
+        return cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4);
     }    
 
     @Override
     public WorkWidth readEntity(Cursor cursor, int offset) {
         WorkWidth entity = new WorkWidth( //
             cursor.getFloat(offset + 0), // workWidth
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // workName
-            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2) // id
+            cursor.getFloat(offset + 1), // offset
+            cursor.getFloat(offset + 2), // distance
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // workName
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4) // id
         );
         return entity;
     }
@@ -103,8 +113,10 @@ public class WorkWidthDao extends AbstractDao<WorkWidth, Long> {
     @Override
     public void readEntity(Cursor cursor, WorkWidth entity, int offset) {
         entity.setWorkWidth(cursor.getFloat(offset + 0));
-        entity.setWorkName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
+        entity.setOffset(cursor.getFloat(offset + 1));
+        entity.setDistance(cursor.getFloat(offset + 2));
+        entity.setWorkName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setId(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
      }
     
     @Override
