@@ -50,7 +50,6 @@
         <activity
             android:name=".activity.SystemSettingActivity"
             android:screenOrientation="landscape" />
-
         <activity
             android:name=".activity.WorkWidthActivity"
             android:screenOrientation="landscape" />

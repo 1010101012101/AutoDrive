@@ -9,7 +9,7 @@ class Cmds {
         val GETSENSORV = "\$ICEGPS,GETSENSORV"
         val GETCONTROLV = "\$ICEGPS,GETCONTROLV"
         val GETSENSORS = "\$ICEGPS,GETSENSORS"
-            val SETSENSORS = "\$ICEGPS,SETSENSORS"
+        val SETSENSORS = "\$ICEGPS,SETSENSORS"
         val CONNECT = "\$ICEGPS,CONNECT,1"
 
         val SETCONTROLS = "\$ICEGPS,SETCONTROLS"
@@ -26,9 +26,6 @@ class Cmds {
         var SATELLITE = "\$ICEGPS,SATELLITE"
         var GETRADIO = "\$ICEGPS,GETRADIO"
         var SETRADIO = "\$ICEGPS,SETRADIO"
-
-
-
 
 
         val SENSORV = "SENSORV"

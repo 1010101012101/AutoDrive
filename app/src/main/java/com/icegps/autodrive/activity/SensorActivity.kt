@@ -36,6 +36,7 @@ class SensorActivity : BaseActivity(), RadioGroup.OnCheckedChangeListener {
     override fun layout(): Int {
         return R.layout.activity_sensor
     }
+
     override fun init() {
         checkedId = rb1.id
         BleWriteHelper.writeCmd(Cmds.GETSENSORV, "1", "200")
@@ -45,8 +46,8 @@ class SensorActivity : BaseActivity(), RadioGroup.OnCheckedChangeListener {
 
     }
 
-   override fun setListener() {
-       iv_left.setOnClickListener({ finish() })
+    override fun setListener() {
+        iv_left.setOnClickListener({ finish() })
         radioGroup.setOnCheckedChangeListener(this)
         tv_re.setOnClickListener({
             showDialog1()
