@@ -5,8 +5,8 @@ import android.graphics.Color;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
-import com.icegps.autodrive.map.utils.ThreadPool;
 import com.icegps.autodrive.map.utils.LatLonUtils;
+import com.icegps.autodrive.map2.threadpool.ThreadPool;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -16,12 +16,13 @@ import java.io.InputStreamReader;
 
 import j.m.jblelib.ble.data.LocationStatus;
 
+
 /**
  * //地图数据管理类
  * Created by 111 on 2018/2/26.
  */
 
-public class    TestData {
+public class TestData {
     private double[] bPos = new double[3];
     private double[] bECEF = new double[3];
     private double[] rPos = new double[3];
@@ -33,11 +34,12 @@ public class    TestData {
     private boolean testThreAdIsStart;
     public static int dataGapTime = 10;
     private boolean startOrStop = false;
+    private ThreadPool threadPool = new ThreadPool();
 
     public void getTestData(final OnTestDataListener onTestDataListener) {
         if (testThreAdIsStart) return;
         testThreAdIsStart = true;
-        ThreadPool.getInstance().executeFixed(new Runnable() {
+        threadPool.execute (new Runnable() {
             @Override
             public void run() {
                 InputStream is = getClass().getClassLoader().getResourceAsStream(assetsFilePath);

@@ -237,7 +237,7 @@ class MapHelper(context: Context) : Helper() {
      * 计算车头角度
      */
     private fun calculateAzimuth(x: Double, y: Double) {
-        if (Math.sqrt((x - oldX) * (x - oldX) + (y - oldY) * (y - oldY)) > 0.1) {
+        if (Math.sqrt((x - oldX) * (x - oldX) + (y - oldY) * (y - oldY)) > 1) {
             azimuth = Math.toDegrees(Math.atan2(x - oldX, y - oldY)).toFloat()
             oldX = x
             oldY = y
@@ -265,8 +265,8 @@ class MapHelper(context: Context) : Helper() {
             for (j in 0 until (workWidth / mapAccuracy).toInt()) {
                 val bitmapLeft = TileUtils.getLeft(x - workWidth + i).toInt()
                 val bitmapTop = TileUtils.getTop(y - workWidth + j).toInt()
-                val pixelX = TileUtils.getX(x - workWidth + i)
-                val pixelY = TileUtils.getY(y - workWidth + j)
+                val pixelX = TileUtils.getPixelLocation(x - workWidth + i)
+                val pixelY = TileUtils.getPixelLocation(y - workWidth + j)
                 val name = StringBuilder().append(bitmapLeft).append(",").append(bitmapTop).toString()
                 var bitmap = bitmapLruCache!!.get(name)
                 if (bitmap == null) {

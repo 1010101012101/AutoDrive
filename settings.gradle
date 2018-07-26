@@ -1,1 +1,1 @@
-include ':app', ':jblelib', ':maplib'
+include ':app', ':jblelib', ':maplib','mapview'

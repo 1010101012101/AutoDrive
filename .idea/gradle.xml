@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/jblelib" />
             <option value="$PROJECT_DIR$/maplib" />
+            <option value="$PROJECT_DIR$/mapview" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

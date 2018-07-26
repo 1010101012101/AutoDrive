@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/jblelib/jblelib.iml" filepath="$PROJECT_DIR$/jblelib/jblelib.iml" />
       <module fileurl="file://$PROJECT_DIR$/maplib/maplib.iml" filepath="$PROJECT_DIR$/maplib/maplib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mapview/mapview.iml" filepath="$PROJECT_DIR$/mapview/mapview.iml" />
     </modules>
   </component>
 </project>

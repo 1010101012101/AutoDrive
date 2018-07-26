@@ -15,7 +15,6 @@ object TileUtils {
     fun getTop(y: Double): Double {
         var bitmapY = y
         bitmapY = Math.floor(bitmapY / tileLength)
-        bitmapY = bitmapY * tileLength
         return bitmapY
     }
 
@@ -28,43 +27,26 @@ object TileUtils {
     fun getLeft(x: Double): Double {
         var bitmapX = x
         bitmapX = Math.floor(bitmapX / tileLength)
-        bitmapX = bitmapX * tileLength
         return bitmapX
     }
 
     /**
      * 根据Y计算当前所处方块的Y
      *
-     * @param y
+     * @param xOrY
      * @return
      */
-    fun getY(y: Double): Int {
-        var y = y
-        val remainder = y % tileLength
+    fun getPixelLocation(xOrY: Double): Int {
+        var xOrY = xOrY
+        val remainder = xOrY % tileLength
         if (remainder >= 0) {
-            y = remainder
+            xOrY = remainder
         } else {
-            y = tileLength - Math.abs(remainder)
+            xOrY = tileLength - Math.abs(remainder)
         }
-        return Math.floor(y.toDouble()).toInt()
+        return Math.floor(xOrY).toInt()
     }
 
-    /**
-     * 根据X计算当前所处方块的X
-     *
-     * @param x
-     * @return
-     */
-    fun getX(x: Double): Int {
-        var x = x
-        val remainder = x % tileLength
-        if (remainder >= 0) {
-            x = remainder
-        } else {
-            x = tileLength - Math.abs(remainder)
-        }
-        return Math.floor(x).toInt()
-    }
 
     /**
      * 初始化一张透明图片
