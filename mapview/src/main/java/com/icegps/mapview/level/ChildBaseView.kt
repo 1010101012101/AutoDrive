@@ -1,13 +1,14 @@
 package com.icegps.mapview.level
 
 import android.content.Context
+import android.text.method.Touch.scrollTo
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
 
-open class ChildBaseLayout:ViewGroup{
+open abstract class ChildBaseView:View{
 
     constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     init {
         setWillNotDraw(false)
     }
@@ -28,4 +29,7 @@ open class ChildBaseLayout:ViewGroup{
     private fun pantheOriginTotheCenter() {
         scrollTo(-measuredWidth / 2, -measuredHeight / 2)
     }
+
+
+   abstract fun setScale(scale: Float)
 }

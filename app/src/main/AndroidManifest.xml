@@ -23,7 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.MapViewActivity"
+            android:name=".activity.MapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,7 +58,7 @@
             android:name=".activity.AddWorkWidthActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".activity.MapActivity"
+            android:name=".activity.ScanBleActivity"
             android:screenOrientation="landscape" />
     </application>
 

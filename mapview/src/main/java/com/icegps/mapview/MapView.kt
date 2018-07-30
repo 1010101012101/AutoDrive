@@ -1,22 +1,21 @@
 package com.icegps.mapview
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Rect
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.icegps.mapview.data.Tile
-import com.icegps.mapview.level.BgLineLayout
-import com.icegps.mapview.level.BitmapLayout
-import com.icegps.mapview.utils.BitmapProvider
+import com.icegps.mapview.level.DrawBackgroundLineView
+import com.icegps.mapview.level.DrawBitmapView
+import com.icegps.mapview.level.DrawPathView
 import com.icegps.mapview.level.MarkerLayout
+import com.icegps.mapview.utils.BitmapProvider
 
 class MapView : GestureDetectorView {
     private var markerLayout: MarkerLayout
-    private var bitmapLayout: BitmapLayout
-    private var bgLineLayout: BgLineLayout
+    private var drawBitmapView: DrawBitmapView
+    private var drawPathView: DrawPathView
+    private var drawBackgroundLineView: DrawBackgroundLineView
     private var tiles: HashSet<Tile> = HashSet()
     private var viewport: Rect
     private var stateSnapshot: StateSnapshot? = null
@@ -42,23 +41,27 @@ class MapView : GestureDetectorView {
 
         viewport = Rect()
 
-        markerLayout = MarkerLayout(context)
-        bitmapLayout = BitmapLayout(context)
-        bgLineLayout = BgLineLayout(context)
 
+        drawBackgroundLineView = DrawBackgroundLineView(context)
+        drawBitmapView = DrawBitmapView(context)
+        drawPathView = DrawPathView(context)
+        markerLayout = MarkerLayout(context)
 
         addLevelView()
     }
 
     private fun addLevelView() {
-        addView(bgLineLayout)
-        addView(bitmapLayout)
+        addView(drawBackgroundLineView)
+        addView(drawBitmapView)
+        addView(drawPathView)
         addView(markerLayout)
     }
 
     override fun scaleChange(scale: Float) {
+        drawBackgroundLineView.setScale(scale)
+        drawBitmapView.setScale(scale)
+        drawPathView.setScale(scale)
         markerLayout.setScale(scale)
-        bitmapLayout.setScale(scale)
     }
 
     /**
@@ -67,6 +70,7 @@ class MapView : GestureDetectorView {
     fun addMarker(x: Double, y: Double, view: View) {
         markerLayout.addMarker(x, y, view)
     }
+
 
     /**
      * 缩小
@@ -117,8 +121,22 @@ class MapView : GestureDetectorView {
     /**
      * 强制重绘Bitmap
      */
-    fun requestBitmapLayoutRender() {
-        bitmapLayout.invalidate()
+    fun requestAllRender() {
+        drawBitmapView.invalidate()
+        drawPathView.invalidate()
+    }
+
+    fun drawPath(path: Path, paint: Paint?): DrawPathView.MapPath {
+        return drawPathView.addPath(path, paint)
+    }
+
+
+    fun clearAllPath(){
+        drawPathView.clearAllPath()
+    }
+
+    fun drawPath(mapPath: DrawPathView.MapPath): DrawPathView.MapPath {
+        return drawPathView.addPath(mapPath)
     }
 
 
@@ -152,7 +170,7 @@ class MapView : GestureDetectorView {
      * 刷新方块
      */
     private fun renderTiles() {
-        bitmapLayout.renderTiles(tiles)
+        drawBitmapView.renderTiles(tiles)
     }
 
 
@@ -160,7 +178,6 @@ class MapView : GestureDetectorView {
      * 计算当前屏幕所需要的方块
      */
     private fun computeCurrentState(): Boolean {
-
         val rowStart = Math.floor((viewport.top.toDouble() / scaleTileLength)).toInt()
         val rowEnd = Math.ceil((viewport.bottom.toDouble() / scaleTileLength)).toInt()
         val columnStart = Math.floor((viewport.left.toDouble() / scaleTileLength)).toInt()
@@ -221,6 +238,21 @@ class MapView : GestureDetectorView {
                 }
             }
 
+    }
+
+    fun onDestroy() {
+        tiles.clear()
+        removeAllViews()
+    }
+
+    fun onResume() {
+        setWillNotDraw(false)
+        computeViewport()
+        renderTiles()
+    }
+
+    fun onPause() {
+        setWillNotDraw(true)
     }
 
     class StateSnapshot {

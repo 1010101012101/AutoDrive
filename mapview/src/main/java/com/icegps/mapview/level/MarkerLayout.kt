@@ -26,6 +26,9 @@ class MarkerLayout(context: Context?) : ViewGroup(context) {
         requestLayout()
     }
 
+
+
+
     /**
      * 添加标记
      */
@@ -95,6 +98,7 @@ class MarkerLayout(context: Context?) : ViewGroup(context) {
     private fun getDefLayoutParams(): LayoutParams {
         return LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
+
 
     open class LayoutParams : ViewGroup.LayoutParams {
         var x = 0.0

@@ -5,18 +5,13 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.R.id.*
 import com.icegps.autodrive.ble.Cmds
 import com.icegps.autodrive.ble.ParseDataBean
-import com.icegps.autodrive.map.utils.LatLonUtils
-import com.icegps.autodrive.utils.Init
-import com.icegps.autodrive.utils.Init.Companion.showToast
 import j.m.jblelib.ble.BleHelper
 import j.m.jblelib.ble.BleStatusCallBackImpl.BleStatusCallBackImpl
 import j.m.jblelib.ble.data.LocationStatus
 import kotlinx.android.synthetic.main.fragment_distance_ring.*
 import kotlinx.android.synthetic.main.fragment_distance_ring.view.*
-import timber.log.Timber
 
 
 class DistanceFragment : BaseFragment() {

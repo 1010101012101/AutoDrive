@@ -1,7 +1,6 @@
 package com.icegps.autodrive.activity
 
 import android.animation.ObjectAnimator
-import android.app.ProgressDialog.show
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
@@ -9,59 +8,57 @@ import android.graphics.drawable.ColorDrawable
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.text.InputType
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.PopupWindow
 import com.icegps.autodrive.R
+import com.icegps.autodrive.adapter.WorkModeAdapter
 import com.icegps.autodrive.ble.BleWriteHelper
 import com.icegps.autodrive.ble.Cmds
 import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.map.MapHelper
-import com.icegps.autodrive.map.utils.ThreadPool
+import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.data.WorkWidth
+import com.icegps.autodrive.gen.GreenDaoUtils
+import com.icegps.autodrive.map.MapUtils
 import com.icegps.autodrive.map.data.TestData
-import com.icegps.autodrive.map.listener.MapCallbackImpl
+import com.icegps.autodrive.map.utils.ThreadPool
+import com.icegps.autodrive.utils.Init
 import com.icegps.autodrive.utils.StringUtils
 import j.m.jblelib.ble.BleHelper
 import j.m.jblelib.ble.BleStatusCallBackImpl.BleStatusCallBackImpl
 import j.m.jblelib.ble.data.LocationStatus
 import j.m.jblelib.ble.failmsg.FailMsg
 import kotlinx.android.synthetic.main.activity_map_view.*
-import java.util.*
-import android.text.InputType
-import android.view.ViewGroup
-import android.widget.PopupWindow
-import com.icegps.autodrive.R.id.*
-import com.icegps.autodrive.adapter.WorkModeAdapter
-import com.icegps.autodrive.ble.ParseDataBean
-import com.icegps.autodrive.utils.Init
 import kotlinx.android.synthetic.main.dialog_new_work.view.*
-import com.icegps.autodrive.data.WorkWidth
-import com.icegps.autodrive.gen.GreenDaoUtils
-import kotlinx.android.synthetic.main.item_device.view.*
 import kotlinx.android.synthetic.main.pop_work_mode.view.*
+import java.util.*
 
 
 class MapActivity : BaseActivity() {
     private var selMode = 0
-
-    override fun layout(): Int {
-        return R.layout.activity_map_view
-    }
-
-    private lateinit var mapHelper: MapHelper
     private var testData: TestData? = null
     private var bleIvAnima: ObjectAnimator? = null
     private var isMarkBPoint = false
     private var mac = ""
     private var autoOrManual = 0
 
-    var dialog: AlertDialog? = null
-    var workModeContentView: View? = null
-    var popWorkModeView: View? = null
-    var workModeAdapter: WorkModeAdapter? = null
-    var popupWindow: PopupWindow? = null
-    var width = 3f
+    private var dialog: AlertDialog? = null
+    private var workModeContentView: View? = null
+    private var popWorkModeView: View? = null
+    private var workModeAdapter: WorkModeAdapter? = null
+    private var popupWindow: PopupWindow? = null
+    private var width = 3f
+    private lateinit var mapUtils: MapUtils
+
+    override fun layout(): Int {
+        return R.layout.activity_map_view
+    }
 
     override fun init() {
+        testData= TestData()
+        mapUtils = MapUtils(map_view, activity, testData!!)
         setIvABEnab(false)
         if (BleHelper.isConnect()) setIvBleStatus(1)
         if (intent.extras == null) {
@@ -75,8 +72,6 @@ class MapActivity : BaseActivity() {
             }
         }
 
-        mapHelper = MapHelper(this)
-        map_view.helper = mapHelper
 
         /**
          * 处理解析数据
@@ -112,10 +107,9 @@ class MapActivity : BaseActivity() {
     }
 
     private fun testData() {
-        testData = TestData()
-//        testData!!.getTestData {
-//            mapHelper.run(locationStatus = it)
-//        }
+        testData!!.getTestData {
+            mapUtils.run(locationStatus = it)
+        }
     }
 
     override fun setListener() {
@@ -126,8 +120,6 @@ class MapActivity : BaseActivity() {
         OnlyBle.addOnParseCompleteCallback(onParseComplete)
 
         BleHelper.addBleCallback(bleStatusCallBackImpl)
-
-        mapHelper.addCallback(mapCallbackImpl)
 
 
         tv_signal.setOnClickListener { startActivity(Intent(activity, SatelliteSignalActivity::class.java)) }
@@ -144,7 +136,7 @@ class MapActivity : BaseActivity() {
                 true -> {
                     ll_ab_point.visibility = View.VISIBLE
                     isMarkBPoint = false
-                    mapHelper.stopWork()
+                    mapUtils.stopWork()
                     setIvABEnab(false)
                     tv_start_or_stop_work.isSelected = false
                     tv_start_or_stop_work.setText(getString(R.string.new_work))
@@ -168,11 +160,10 @@ class MapActivity : BaseActivity() {
                 dialog!!.dismiss()
                 return@setOnClickListener
             }
-            mapHelper.workWidth = width
             dialog!!.dismiss()
             ll_ab_point.visibility = View.VISIBLE
             setIvABEnab(true)
-            mapHelper.startWork()
+            mapUtils.startWork()
             tv_start_or_stop_work.isSelected = true
             tv_start_or_stop_work.setText(getString(R.string.stop))
             setTvHintStr(getString(R.string.please_set_a))
@@ -189,23 +180,19 @@ class MapActivity : BaseActivity() {
 
 
         iv_set_a_point.setOnClickListener {
-            markAPoint()
+            if (!iv_set_a_point.isSelected){
+                mapUtils.markerA()
+                iv_set_a_point.isSelected=true
+            }
         }
 
         iv_set_b_point.setOnClickListener {
-            markBPoint()
-            ll_ab_point.visibility = View.GONE
+            if (!iv_set_b_point.isSelected){
+                mapUtils.markerB()
+                iv_set_b_point.isSelected=true
+            }
         }
 
-        iv_set_a_point.setOnLongClickListener {
-            unMarkAPoint()
-            true
-        }
-
-        iv_set_b_point.setOnLongClickListener {
-            unMarkBPoint()
-            true
-        }
 
         iv_set_offset.setOnClickListener {
             val et = EditText(activity)
@@ -216,15 +203,12 @@ class MapActivity : BaseActivity() {
                     .setNegativeButton("取消", null)
                     .setPositiveButton("确定", object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface?, which: Int) {
-                            mapHelper.setAbLineOffset(et.text.toString().toFloat())
+                            //TODO 设置偏移
                         }
                     })
                     .show()
         }
-        iv_set_offset.setOnLongClickListener {
-            mapHelper.inversionAb()
-            return@setOnLongClickListener true
-        }
+
 
     }
 
@@ -271,46 +255,8 @@ class MapActivity : BaseActivity() {
     }
 
 
-    /**
-     * 设置A点
-     */
-    private fun markAPoint() {
-        if (!iv_set_a_point.isSelected)
-            changeTvASel(mapHelper.markAPoint())
 
-    }
 
-    /**
-     * 设置B点
-     */
-    private fun markBPoint() {
-        if (!iv_set_b_point.isSelected) {
-            isMarkBPoint = mapHelper.markBPoint()
-            changeTvBSel(isMarkBPoint)
-            if (isMarkBPoint) {
-                setTvHintStr("A点距B点的直线距离距离为" + StringUtils.setAccuracy(mapHelper.distance / 2, 2) + "米")
-            }
-        }
-    }
-
-    /**
-     * 取消A点
-     */
-    private fun unMarkAPoint() {
-        changeTvASel(false)
-        changeTvBSel(false)
-        isMarkBPoint = false
-        mapHelper.unMarkAPoint()
-    }
-
-    /**
-     * 取消B点
-     */
-    private fun unMarkBPoint() {
-        changeTvBSel(false)
-        isMarkBPoint = false
-        mapHelper.unMarkBPoint()
-    }
 
     /**
      * 改变A button 的 Selected
@@ -368,7 +314,6 @@ class MapActivity : BaseActivity() {
         BleHelper.disconnect()
         OnlyBle.unregister()
         OnlyBle.removeParseCompleteCallback(onParseComplete)
-        mapHelper.removeCallback(mapCallbackImpl)
     }
 
     override fun onPause() {
@@ -456,22 +401,22 @@ class MapActivity : BaseActivity() {
             if (d > 10) {
                 BleWriteHelper.writeCmd(Cmds.AUTO, "0")
             }
-            mapHelper.run(locationStatus)
+            mapUtils.run(locationStatus)
         }
     }
-    /**
-     * @see MapHelper.addCallback
-     */
-    private var mapCallbackImpl = object : MapCallbackImpl() {
-
-        override fun onAbDistance(distance: Double) {
-            runOnUiThread {
-                if (!isMarkBPoint) {
-                    setTvHintStr("当前距离A点的直线距离为" + StringUtils.setAccuracy(distance / 2, 2) + "米")
-                }
-            }
-        }
-    }
+//    /**
+//     * @see MapHelper.addCallback
+//     */
+//    private var mapCallbackImpl = object : MapCallbackImpl() {
+//
+//        override fun onAbDistance(distance: Double) {
+//            runOnUiThread {
+//                if (!isMarkBPoint) {
+//                    setTvHintStr("当前距离A点的直线距离为" + StringUtils.setAccuracy(distance / 2, 2) + "米")
+//                }
+//            }
+//        }
+//    }
 
     private var onParseComplete = object : OnlyBle.OnParseComplete {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {

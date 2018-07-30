@@ -2,12 +2,9 @@ package com.icegps.mapview.level
 
 import android.content.Context
 import android.graphics.*
-import android.util.AttributeSet
-import android.view.ViewGroup
-import com.icegps.mapview.data.MapColor
 import com.icegps.mapview.data.Tile
 
-class BitmapLayout : ChildBaseLayout {
+class DrawBitmapView : ChildBaseView {
     private var scale = 1f
     private var tiles: HashSet<Tile>? = null
         set(value) {
@@ -16,7 +13,6 @@ class BitmapLayout : ChildBaseLayout {
         }
 
     constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
 
     init {
@@ -26,7 +22,7 @@ class BitmapLayout : ChildBaseLayout {
     /**
      * 设置缩放
      */
-    fun setScale(scale: Float) {
+    override fun setScale(scale: Float) {
         this.scale = scale
         requestLayout()
     }

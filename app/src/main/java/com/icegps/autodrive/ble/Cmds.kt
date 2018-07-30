@@ -13,7 +13,6 @@ class Cmds {
         val CONNECT = "\$ICEGPS,CONNECT,1"
 
         val SETCONTROLS = "\$ICEGPS,SETCONTROLS"
-
         val GETCONTROLS = "\$ICEGPS,GETCONTROLS"
         val GETGPSDATA = "\$ICEGPS,GETGPSDATA"
         val SETWORKS = "\$ICEGPS,SETWORKS"

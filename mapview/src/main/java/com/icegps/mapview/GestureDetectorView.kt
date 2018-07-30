@@ -44,7 +44,7 @@ abstract class GestureDetectorView : ViewGroup {
      * 最大最小缩放
      */
     private val minScale = 1f
-    private val maxScale = 100f
+    private val maxScale = 50f
 
     private var listeners: HashSet<Listener>? = null
     /**
@@ -64,6 +64,7 @@ abstract class GestureDetectorView : ViewGroup {
     private var scroller: Scroller
 
     private var isDraging = false
+    private var isDoubleScale = false
 
     /**
      * 缩放后的宽高
@@ -89,7 +90,6 @@ abstract class GestureDetectorView : ViewGroup {
             } else {
                 onDraging()
             }
-
             tx = tx + distanceX.toInt()
             ty = ty + distanceY.toInt()
             scrollTo(tx, ty)
@@ -100,7 +100,10 @@ abstract class GestureDetectorView : ViewGroup {
 
 
         override fun onDoubleTap(e: MotionEvent?): Boolean {
-            doubleRefershScale(e!!.x.toInt(), e.y.toInt(), scale * defaultZoomMultiple)
+            if (!isDoubleScale) {
+                isDoubleScale = true
+                doubleRefershScale(e!!.x.toInt(), e.y.toInt(), scale * defaultZoomMultiple)
+            }
             return true
         }
     }
@@ -111,10 +114,11 @@ abstract class GestureDetectorView : ViewGroup {
      */
     private var onScaleGestureListener = object : ScaleGestureDetector.OnScaleGestureListener {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            val scale = scaleCopy * detector.scaleFactor
-            zoom(detector.focusX.toInt(), detector.focusY.toInt(), scale)
-            this@GestureDetectorView.scale = checkScale(scale)
-
+            if (!isDoubleScale) {
+                val scale = scaleCopy * detector.scaleFactor
+                zoom(detector.focusX.toInt(), detector.focusY.toInt(), scale)
+                this@GestureDetectorView.scale = checkScale(scale)
+            }
             return false
         }
 
@@ -157,6 +161,7 @@ abstract class GestureDetectorView : ViewGroup {
                     onDragEnd()
                 }
             }
+
         }
         return true
     }
@@ -403,6 +408,7 @@ abstract class GestureDetectorView : ViewGroup {
                 gestureDetectorView.ty += y.toInt()
                 if (scaleChange) {
                     gestureDetectorView.onScaleEnd()
+                    gestureDetectorView.isDoubleScale = false
                 }
                 if (translationChange) {
                     gestureDetectorView.onDragEnd()
@@ -444,10 +450,10 @@ abstract class GestureDetectorView : ViewGroup {
 
     /**
      * 拖动到指定位置 (动画)
-     * @param x 这个值应该是* scale之后的结果
-     * @param y 这个值应该是* scale之后的结果
+     * @param x
+     * @param y
      */
-    fun drag(x: Int, y: Int) {
+    fun dragTo(x: Int, y: Int) {
         var x = x - width / 2 + scaleWidth / 2
         var y = y - height / 2 + scaleHeight / 2
         scroller.startScroll(scrollX, scrollY, 0, 0, animationDuration.toInt())
@@ -457,11 +463,23 @@ abstract class GestureDetectorView : ViewGroup {
         onDragBegin()
     }
 
+    private var oldDragByX = 0
+    private var oldDragByY = 0
+    fun dragBy(x: Double, y: Double) {
+        var x = (x * scale).toInt()
+        var y = (y * scale).toInt()
+        tx += x - oldDragByX
+        ty += y - oldDragByY
+        scrollTo(tx, ty)
+        oldDragByX = x
+        oldDragByY = y
+    }
+
     /**
      * 拖动到指定位置(立刻)
      *
-     * @param x 这个值应该是* scale之后的结果
-     * @param y 这个值应该是* scale之后的结果
+     * @param x
+     * @param y
      */
     fun dragImmediately(x: Int, y: Int) {
         onDragBegin()
@@ -530,6 +548,15 @@ abstract class GestureDetectorView : ViewGroup {
 
     abstract fun requestRender()
 
+
+    fun addListener(listener: Listener) {
+        listeners!!.add(listener)
+    }
+
+    fun removeListener(listener: Listener) {
+        listeners!!.remove(listener)
+    }
+
     interface Listener {
         fun onScaleBegin(scale: Float)
         fun onScaling(scale: Float)
@@ -537,5 +564,27 @@ abstract class GestureDetectorView : ViewGroup {
         fun onDragBegin(scrollX: Int, scrollY: Int)
         fun onDraging(scrollX: Int, scrollY: Int)
         fun onDragEnd(scrollX: Int, scrollY: Int)
+    }
+
+
+    open class ListenerImpl : Listener {
+        override fun onScaleBegin(scale: Float) {
+        }
+
+        override fun onScaling(scale: Float) {
+        }
+
+        override fun onScaleEnd(scale: Float) {
+        }
+
+        override fun onDragBegin(scrollX: Int, scrollY: Int) {
+        }
+
+        override fun onDraging(scrollX: Int, scrollY: Int) {
+        }
+
+        override fun onDragEnd(scrollX: Int, scrollY: Int) {
+        }
+
     }
 }

@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.icegps.autodrive.map.utils.LatLonUtils;
-import com.icegps.autodrive.map2.threadpool.ThreadPool;
+import com.icegps.autodrive.map.threadpool.ThreadPool;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,6 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import j.m.jblelib.ble.data.LocationStatus;
+
+import static com.icegps.autodrive.map.utils.LatLonUtils.R2D;
+import static com.icegps.autodrive.map.utils.LatLonUtils.ecef2pos;
+import static com.icegps.autodrive.map.utils.LatLonUtils.enu2ecef;
 
 
 /**
@@ -93,6 +97,20 @@ public class TestData {
                 }
             }
         });
+    }
+
+    public  double[] xy2LatLon(double x, double y) {
+        enu[0] = x / 2d;
+        enu[1] = -y / 2d;
+        enu[2] = 0;
+        vECEF = enu2ecef(bPos, enu);
+        rECEF[0] = vECEF[0] + bECEF[0];
+        rECEF[1] = vECEF[1] + bECEF[1];
+        rECEF[2] = vECEF[2] + bECEF[2];
+        rPos = ecef2pos(rECEF);
+        rPos[0] *= R2D;
+        rPos[1] *= R2D;
+        return rPos;
     }
 
     public void startOrStop(boolean startOrStop) {

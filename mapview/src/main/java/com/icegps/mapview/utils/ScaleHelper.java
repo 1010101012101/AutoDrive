@@ -3,10 +3,10 @@ package com.icegps.mapview.utils;
 
 public class ScaleHelper {
     public static int scale(double base, float multiplier) {
-        return (int) ((base * multiplier) + 0.5);
+        return (int) ((base * multiplier));
     }
 
-    public static int unscale(int base, float multiplier) {
-        return (int) ((base / multiplier) + 0.5);
+    public static double unscale(double base, float multiplier) {
+        return ((base / multiplier));
     }
 }
