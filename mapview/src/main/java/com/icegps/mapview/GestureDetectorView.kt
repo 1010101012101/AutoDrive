@@ -115,8 +115,8 @@ abstract class GestureDetectorView : ViewGroup {
     private var onScaleGestureListener = object : ScaleGestureDetector.OnScaleGestureListener {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             if (!isDoubleScale) {
-                val scale = scaleCopy * detector.scaleFactor
-                zoom(detector.focusX.toInt(), detector.focusY.toInt(), scale)
+                val scale = checkScale(scaleCopy * detector.scaleFactor)
+                zoom(detector.focusX.toInt(), detector.focusY.toInt(), (scale))
                 this@GestureDetectorView.scale = checkScale(scale)
             }
             return false
@@ -130,6 +130,7 @@ abstract class GestureDetectorView : ViewGroup {
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             onScaleEnd()
+            println("--------------------")
         }
     }
 
@@ -191,11 +192,11 @@ abstract class GestureDetectorView : ViewGroup {
      * 设置缩放
      */
     private fun setMapScale(scale: Float) {
+        scaleChange(scale)
         var scale = scale
         scale = checkScale(scale)
         if (this.scale != scale) {
             this.scale = scale
-            scaleChange(scale)
         }
     }
 
@@ -204,10 +205,10 @@ abstract class GestureDetectorView : ViewGroup {
      * 缩放值不应该小于最小限制也不应该大于最大限制
      */
     private fun checkScale(scale: Float): Float {
-        if (scale < minScale) {
+        if (scale <= minScale) {
             return minScale
         }
-        if (scale > maxScale) {
+        if (scale >= maxScale) {
             return maxScale
         }
         return scale
@@ -230,15 +231,13 @@ abstract class GestureDetectorView : ViewGroup {
      * 两指手势放大
      */
     private fun zoom(x: Int, y: Int, scale: Float) {
-        var scale = checkScale(scale)
-
-        if (scale == this.scaleCopy || getMapAnimator()!!.isStarted) {
+        if (getMapAnimator()!!.isStarted) {
             return
         }
         var scaleScrollX = getOffsetScrollXFromScale(x, scale, this.scale)
 
         var scaleScrollY = getOffsetScrollYFromScale(y, scale, this.scale)
-
+        println(scaleScrollX)
         tx += scaleScrollX
 
         ty += scaleScrollY

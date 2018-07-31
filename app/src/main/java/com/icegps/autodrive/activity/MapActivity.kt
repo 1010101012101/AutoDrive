@@ -43,7 +43,6 @@ class MapActivity : BaseActivity() {
     private var isMarkBPoint = false
     private var mac = ""
     private var autoOrManual = 0
-
     private var dialog: AlertDialog? = null
     private var workModeContentView: View? = null
     private var popWorkModeView: View? = null
@@ -57,7 +56,7 @@ class MapActivity : BaseActivity() {
     }
 
     override fun init() {
-        testData= TestData()
+        testData = TestData()
         mapUtils = MapUtils(map_view, activity, testData!!)
         setIvABEnab(false)
         if (BleHelper.isConnect()) setIvBleStatus(1)
@@ -77,6 +76,7 @@ class MapActivity : BaseActivity() {
          * 处理解析数据
          */
         OnlyBle.register()
+
         testData()
         workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
         workModeContentView = View.inflate(this, R.layout.dialog_new_work, null)
@@ -115,6 +115,7 @@ class MapActivity : BaseActivity() {
     override fun setListener() {
         iv_wheel.setOnClickListener {
             BleWriteHelper.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
+
         }
 
         OnlyBle.addOnParseCompleteCallback(onParseComplete)
@@ -180,16 +181,16 @@ class MapActivity : BaseActivity() {
 
 
         iv_set_a_point.setOnClickListener {
-            if (!iv_set_a_point.isSelected){
+            if (!iv_set_a_point.isSelected) {
                 mapUtils.markerA()
-                iv_set_a_point.isSelected=true
+                iv_set_a_point.isSelected = true
             }
         }
 
         iv_set_b_point.setOnClickListener {
-            if (!iv_set_b_point.isSelected){
+            if (!iv_set_b_point.isSelected) {
                 mapUtils.markerB()
-                iv_set_b_point.isSelected=true
+                iv_set_b_point.isSelected = true
             }
         }
 
@@ -253,27 +254,6 @@ class MapActivity : BaseActivity() {
             iv_set_b_point.isSelected = false
         }
     }
-
-
-
-
-
-    /**
-     * 改变A button 的 Selected
-     */
-    private fun changeTvASel(sel: Boolean) {
-        iv_set_a_point.isSelected = sel
-
-    }
-
-    /**
-     * 改变B button 的 Selected
-     */
-    private fun changeTvBSel(sel: Boolean) {
-        iv_set_b_point.isSelected = sel
-
-    }
-
 
     /**
      * 蓝牙连接中的闪烁动画
@@ -425,6 +405,10 @@ class MapActivity : BaseActivity() {
                 autoOrManual = parseDataBean!!.workStatus.workMode
                 iv_wheel.drawable.setLevel(autoOrManual)
             }
+            if (autoOrManual == 1) {
+                mapUtils.sendAb2Blue()
+            }
+
             val offset = parseDataBean.workStatus.distanceOffset
             if (offset != null) {
                 tv_offset.setText(offset.toInt().toString())
