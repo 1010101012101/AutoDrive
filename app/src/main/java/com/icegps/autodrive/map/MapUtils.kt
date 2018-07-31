@@ -12,6 +12,7 @@ import com.icegps.autodrive.ble.Cmds
 import com.icegps.autodrive.map.data.TestData
 import com.icegps.autodrive.map.utils.BitmapProviderUtils
 import com.icegps.autodrive.map.utils.MathUtils
+import com.icegps.autodrive.map.utils.ThreadPool
 import com.icegps.mapview.GestureDetectorView
 import com.icegps.mapview.MapView
 import com.icegps.mapview.utils.ScaleHelper
@@ -21,28 +22,27 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var mapview: MapView
     private var activity: Activity
     private var tileLength = 200f
-    private var workWidth = 3F
+    var workWidth = 3F
+    private var mapAccuracy = 0.1f
+    private var tractors: View? = null
+    private var ivMarkerA: View? = null
+    private var ivMarkerB: View? = null
+    private var bitmapProviderUtils: BitmapProviderUtils
+    private var datumLine: DoubleArray
+    private var line: FloatArray
+    private var isMarkerB = false
+    private var isMarkerA = false
+    private var centerLinePosition = 0
+    private var moveLine = 0.0
+    private var centerLinePaint: Paint? = null
+    private var centerShadowPaint: Paint? = null
+    private var centerShadowPath: Path
+    private var scale = 1.0f
     private var workWidthPixel = 0f
         get() {
             field = workWidth / mapAccuracy
             return field
         }
-    private var mapAccuracy = 0.1f
-
-
-    private var tractors: View? = null
-    private var bitmapProviderUtils: BitmapProviderUtils
-
-    private var datumLine: DoubleArray
-    private var line: FloatArray
-    private var isMarkerAB = false
-    private var centerLinePosition = 0
-    private var lenghten = 0.0
-    private var centerLinePaint: Paint? = null
-    private var centerShadowPaint: Paint? = null
-    private var centerShadowPath: Path
-    private var scale = 1.0f
-
     /**
      * 发送给设备的A点与B点的经纬度
      */
@@ -51,6 +51,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var bLat = 0.0
     private var bLon = 0.0
 
+    private var locationStatus: LocationStatus? = null
 
     private var currentLat = 0.0
     private var currentLon = 0.0
@@ -64,16 +65,16 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     private var isStartWork = false
     private var testData: TestData
-
+    private var threadPool:ThreadPool
     init {
         this.mapview = mapview
         this.activity = activity
         this.testData = testData
         datumLine = DoubleArray(4)
         line = FloatArray(4)
-
+        threadPool= ThreadPool.getInstance()
         //添加拖拉机图标
-        addTractors()
+        createMarker()
         //设置地图大小
         mapview.setSize(20000, 20000)
         //给mapview设置bitmap提供者
@@ -83,8 +84,10 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             override fun onScaling(scale: Float) {
                 super.onScaling(scale)
                 this@MapUtils.scale = scale
-                if (isMarkerAB)
-                    setWorkArea(centerLinePosition, lenghten, scale)
+                if (isMarkerB)
+                    threadPool.executeFixed(Runnable {
+                        setWorkArea(centerLinePosition, moveLine, scale)
+                    })
             }
         })
 
@@ -102,18 +105,16 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     fun run(locationStatus: LocationStatus) {
         if (!isStartWork) return
-
+        this.locationStatus = locationStatus
         currentMoveX = locationStatus.x
         currentMoveY = locationStatus.y
         currentLat = locationStatus.latitude
         currentLon = locationStatus.longitude
+        bitmapProviderUtils!!.createBitmapByXy(currentMoveX, currentMoveY)
         if (tractors != null) {
             moveTractors(currentMoveX, currentMoveY, tractors!!)
         }
-        bitmapProviderUtils!!.createBitmapByXy(currentMoveX, currentMoveY)
-
     }
-
 
     private fun moveTractors(x: Double, y: Double, tractors: View) {
         activity.runOnUiThread(Runnable {
@@ -129,7 +130,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             //请求mapview重新获取当前屏幕的方块
             mapview.requestGetTile()
             //请求bitmaplayout重绘
-            mapview.requestAllRender()
+            mapview.requestRender()
             //当前拖动值+上拖拉机移动的值
             mapview.dragBy(x, y)
             //刷新工作区域
@@ -138,29 +139,45 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     }
 
 
-    fun addTractors() {
+    fun createMarker() {
         tractors = createMarkerIv(R.mipmap.tractors)
+        ivMarkerA = createMarkerIv(R.mipmap.a_point)
+        ivMarkerB = createMarkerIv(R.mipmap.b_point)
         addMarker(0.0, 0.0, tractors!!)
     }
 
 
-    fun markerA() {
-        addMarker(currentMoveX, currentMoveY, createMarkerIv(R.mipmap.a_point))
-        datumLine[0] = currentMoveX
-        datumLine[1] = currentMoveY
-        aLat = currentLat
-        aLon = currentLon
+    fun markerA(): Boolean {
+        if (locationStatus == null) return false
+        addMarker(0)
+        return true
     }
 
-    fun markerB() {
-        addMarker(currentMoveX, currentMoveY, createMarkerIv(R.mipmap.b_point))
-        datumLine[2] = currentMoveX
-        datumLine[3] = currentMoveY
-        bLat = currentLat
-        bLon = currentLon
-        sendAb2Blue()
-        drawWorkArea()
-        isMarkerAB = true
+    fun markerB(): Boolean {
+        if (locationStatus == null) return false
+        addMarker(1)
+        return true
+    }
+
+
+    private fun addMarker(aorb: Int) {
+        if (aorb == 0) {
+            addMarker(currentMoveX, currentMoveY, ivMarkerA!!)
+            datumLine[0] = currentMoveX
+            datumLine[1] = currentMoveY
+            aLat = currentLat
+            aLon = currentLon
+            isMarkerA = true
+        } else {
+            addMarker(currentMoveX, currentMoveY, ivMarkerB!!)
+            datumLine[2] = currentMoveX
+            datumLine[3] = currentMoveY
+            bLat = currentLat
+            bLon = currentLon
+            sendAb2Blue()
+            drawWorkArea()
+            isMarkerB = true
+        }
     }
 
 
@@ -173,13 +190,18 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
      * 实时刷新5条线
      */
     private fun refreshWorkArea() {
-        if (isMarkerAB) {
-            //车与A点距离
-            var AC = MathUtils.calculateDictance(currentMoveX, currentMoveY, datumLine[0], datumLine[1])
-            //车与B点距离
-            var BC = MathUtils.calculateDictance(currentMoveX, currentMoveY, datumLine[2], datumLine[3])
-            //A点与B点距离
-            var AB = MathUtils.calculateDictance(datumLine[0], datumLine[1], datumLine[2], datumLine[3])
+        //车与A点距离
+        var AC = MathUtils.calculateDictance(currentMoveX, currentMoveY, datumLine[0], datumLine[1])
+        //车与B点距离
+        var BC = MathUtils.calculateDictance(currentMoveX, currentMoveY, datumLine[2], datumLine[3])
+        //A点与B点距离
+        var AB = MathUtils.calculateDictance(datumLine[0], datumLine[1], datumLine[2], datumLine[3])
+        if (isMarkerA && !isMarkerB) {
+            if (mapStateCallback != null) {
+                mapStateCallback!!.onAbDistance(AC)
+            }
+        }
+        if (isMarkerB) {
             //abc组成三角形 ab为底边  三角地形的高度
             var triangleHeight = MathUtils.calculateTriangleHeight(AC, BC, AB)
             //当前位于第几根线
@@ -226,12 +248,13 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
             }
 
-            if (Math.abs(lenghten - this.lenghten) > ScaleHelper.unscale(50.0, scale)) {
+            if (Math.abs(lenghten - this.moveLine) > ScaleHelper.unscale(50.0, scale)) {
                 setWorkArea(centerLinePosition, lenghten, scale)
-                this.lenghten = lenghten
+                this.moveLine = lenghten
             }
 
             refreshAb(centerLinePosition)
+
 
         }
     }
@@ -294,12 +317,12 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
      * @param moveLine 线需要移动多少
      */
     private fun setWorkArea(centerLinePosition: Int, moveLine: Double, scale: Float) {
-        mapview.clearAllPath()
+        mapview.clearPath()
         for (i in centerLinePosition - 2..centerLinePosition + 2) {
             //平移线条
             val offsetLine = MathUtils.offsetLine(datumLine, workWidthPixel * i)
             //左右单边延长的长度
-            val max = Math.max(mapview.height, mapview.width) / 2 / 2
+            val max = Math.min(mapview.height, mapview.width) / 2
             //延长线条
             var lengthenLine = MathUtils.lengthenLine(offsetLine, ScaleHelper.unscale(max.toDouble(), scale))
             //移动线条
@@ -307,6 +330,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
             val linePath = MathUtils.doubleArray2Path(moveLengthenLine)
 
+            mapview.drawPath(linePath, if (i == centerLinePosition) centerLinePaint else null)
             //添加阴影部分
             if (i == centerLinePosition) {
                 centerShadowPath.reset()
@@ -318,13 +342,16 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
                 centerShadowPath.lineTo(offsetLine2[0].toFloat(), offsetLine2[1].toFloat())
                 centerShadowPath.close()
                 mapview.drawPath(centerShadowPath, centerShadowPaint)
-
             }
-
-            mapview.drawPath(linePath, if (i == centerLinePosition) centerLinePaint else null)
         }
     }
 
+    fun setOffset(offset: Float) {
+        datumLine = MathUtils.offsetLine(datumLine, offset)
+        mapview.moveMarker(datumLine[0],datumLine[1],ivMarkerA!!)
+        mapview.moveMarker(datumLine[2],datumLine[3],ivMarkerB!!)
+        setWorkArea(centerLinePosition, moveLine, scale)
+    }
 
     private fun addMarker(x: Double, y: Double, view: View) {
         mapview.addMarker(x, y, view)
@@ -343,7 +370,20 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     fun startWork() {
         isStartWork = true
+        isMarkerA = false
+        isMarkerB = false
+
+        bitmapProviderUtils.clearBitmapTileCache()
+        mapview.removeMarker(ivMarkerA!!)
+        mapview.removeMarker(ivMarkerB!!)
+        mapview.clearPath()
+        mapview.clearTile()
+        mapview.requestRender()
     }
 
+    var mapStateCallback: MapStateCallback? = null
 
+    interface MapStateCallback {
+        fun onAbDistance(distance: Double)
+    }
 }

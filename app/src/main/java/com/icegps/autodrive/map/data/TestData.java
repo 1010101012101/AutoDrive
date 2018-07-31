@@ -83,7 +83,7 @@ public class TestData {
                         locationStatus.setDifference(dispersion);
                         locationStatus.setAltitude(rPos[2]);
                         locationStatus.setColor(Color.parseColor("#770000FF"));
-                        if (onTestDataListener != null) {
+                        if (onTestDataListener != null&&Math.abs(locationStatus.getX())<1000&&Math.abs(locationStatus.getY())<1000) {
                             onTestDataListener.onData(locationStatus);
                         }
                         SystemClock.sleep(dataGapTime);

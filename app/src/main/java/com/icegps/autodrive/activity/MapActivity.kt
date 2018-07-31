@@ -40,7 +40,6 @@ class MapActivity : BaseActivity() {
     private var selMode = 0
     private var testData: TestData? = null
     private var bleIvAnima: ObjectAnimator? = null
-    private var isMarkBPoint = false
     private var mac = ""
     private var autoOrManual = 0
     private var dialog: AlertDialog? = null
@@ -113,9 +112,9 @@ class MapActivity : BaseActivity() {
     }
 
     override fun setListener() {
+        mapUtils.mapStateCallback = mapStateCallback
         iv_wheel.setOnClickListener {
             BleWriteHelper.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
-
         }
 
         OnlyBle.addOnParseCompleteCallback(onParseComplete)
@@ -136,7 +135,6 @@ class MapActivity : BaseActivity() {
                 }
                 true -> {
                     ll_ab_point.visibility = View.VISIBLE
-                    isMarkBPoint = false
                     mapUtils.stopWork()
                     setIvABEnab(false)
                     tv_start_or_stop_work.isSelected = false
@@ -164,11 +162,11 @@ class MapActivity : BaseActivity() {
             dialog!!.dismiss()
             ll_ab_point.visibility = View.VISIBLE
             setIvABEnab(true)
+            mapUtils.workWidth = width
             mapUtils.startWork()
             tv_start_or_stop_work.isSelected = true
             tv_start_or_stop_work.setText(getString(R.string.stop))
             setTvHintStr(getString(R.string.please_set_a))
-
         }
 
         workModeAdapter!!.setOnItemClickListener { adapter, view, position ->
@@ -182,15 +180,16 @@ class MapActivity : BaseActivity() {
 
         iv_set_a_point.setOnClickListener {
             if (!iv_set_a_point.isSelected) {
-                mapUtils.markerA()
-                iv_set_a_point.isSelected = true
+                if (mapUtils.markerA()) {
+                    iv_set_a_point.isSelected = true
+                }
             }
         }
 
         iv_set_b_point.setOnClickListener {
             if (!iv_set_b_point.isSelected) {
-                mapUtils.markerB()
-                iv_set_b_point.isSelected = true
+                iv_set_b_point.isSelected = mapUtils.markerB()
+                ll_ab_point.visibility = View.GONE
             }
         }
 
@@ -204,10 +203,21 @@ class MapActivity : BaseActivity() {
                     .setNegativeButton("取消", null)
                     .setPositiveButton("确定", object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface?, which: Int) {
-                            //TODO 设置偏移
+                            try {
+                                val offset = et.text.toString().toFloat()
+                                mapUtils.setOffset(offset * 10)
+                            } catch (e: NumberFormatException) {
+
+                            }
+
                         }
                     })
                     .show()
+        }
+
+        iv_wheel.setOnLongClickListener {
+            map_view.dragTo(0, 0)
+            return@setOnLongClickListener true
         }
 
 
@@ -384,19 +394,17 @@ class MapActivity : BaseActivity() {
             mapUtils.run(locationStatus)
         }
     }
-//    /**
-//     * @see MapHelper.addCallback
-//     */
-//    private var mapCallbackImpl = object : MapCallbackImpl() {
-//
-//        override fun onAbDistance(distance: Double) {
-//            runOnUiThread {
-//                if (!isMarkBPoint) {
-//                    setTvHintStr("当前距离A点的直线距离为" + StringUtils.setAccuracy(distance / 2, 2) + "米")
-//                }
-//            }
-//        }
-//    }
+    /**
+     * @see MapHelper.addCallback
+     */
+    private var mapStateCallback = object : MapUtils.MapStateCallback {
+
+        override fun onAbDistance(distance: Double) {
+            runOnUiThread {
+                setTvHintStr("当前距离A点的直线距离为" + StringUtils.setAccuracy(distance / 10, 2) + "米")
+            }
+        }
+    }
 
     private var onParseComplete = object : OnlyBle.OnParseComplete {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {

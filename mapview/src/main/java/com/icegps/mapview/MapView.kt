@@ -71,6 +71,13 @@ class MapView : GestureDetectorView {
         markerLayout.addMarker(x, y, view)
     }
 
+    fun removeMarker(view: View) {
+        markerLayout.removeView(view)
+    }
+
+    fun removeAllMarkers() {
+        markerLayout.removeAllViews()
+    }
 
     /**
      * 缩小
@@ -106,7 +113,7 @@ class MapView : GestureDetectorView {
     }
 
 
-    override fun requestRender() {
+    override fun render() {
         computeViewport()
         renderTiles()
     }
@@ -121,7 +128,7 @@ class MapView : GestureDetectorView {
     /**
      * 强制重绘Bitmap
      */
-    fun requestAllRender() {
+    fun requestRender() {
         drawBitmapView.invalidate()
         drawPathView.invalidate()
     }
@@ -131,8 +138,13 @@ class MapView : GestureDetectorView {
     }
 
 
-    fun clearAllPath(){
+    fun clearPath() {
         drawPathView.clearAllPath()
+    }
+
+    fun clearTile() {
+        drawBitmapView.clearTiles()
+        tiles.clear()
     }
 
     fun drawPath(mapPath: DrawPathView.MapPath): DrawPathView.MapPath {

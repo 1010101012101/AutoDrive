@@ -51,7 +51,6 @@ abstract class GestureDetectorView : ViewGroup {
      * 当前缩放
      */
     var scale = 1f
-    private var scaleCopy = 1f
 
     var tx = 0
     var ty = 0
@@ -93,8 +92,6 @@ abstract class GestureDetectorView : ViewGroup {
             tx = tx + distanceX.toInt()
             ty = ty + distanceY.toInt()
             scrollTo(tx, ty)
-            invalidate()
-
             return super.onScroll(e1, e2, distanceX, distanceY)
         }
 
@@ -115,22 +112,19 @@ abstract class GestureDetectorView : ViewGroup {
     private var onScaleGestureListener = object : ScaleGestureDetector.OnScaleGestureListener {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             if (!isDoubleScale) {
-                val scale = checkScale(scaleCopy * detector.scaleFactor)
-                zoom(detector.focusX.toInt(), detector.focusY.toInt(), (scale))
-                this@GestureDetectorView.scale = checkScale(scale)
+                val scale = checkScale(scale * detector.scaleFactor)
+                zoom(detector.focusX.toInt(), detector.focusY.toInt(), scale)
             }
-            return false
+            return true
         }
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
-            scaleCopy = scale
             onScaleBegin()
             return true
         }
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             onScaleEnd()
-            println("--------------------")
         }
     }
 
@@ -153,8 +147,8 @@ abstract class GestureDetectorView : ViewGroup {
 
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(event)
-        scaleGestureDetector.onTouchEvent(event)
+        val a = gestureDetector.onTouchEvent(event)
+        val b = scaleGestureDetector.onTouchEvent(event)
         when (event!!.action) {
             MotionEvent.ACTION_UP -> {
                 if (isDraging) {
@@ -164,7 +158,7 @@ abstract class GestureDetectorView : ViewGroup {
             }
 
         }
-        return true
+        return a || b
     }
 
     /**
@@ -197,6 +191,7 @@ abstract class GestureDetectorView : ViewGroup {
         scale = checkScale(scale)
         if (this.scale != scale) {
             this.scale = scale
+            invalidate()
         }
     }
 
@@ -220,6 +215,7 @@ abstract class GestureDetectorView : ViewGroup {
     fun doubleRefershScale(x: Int, y: Int, scale: Float) {
         var scale = checkScale(scale)
         if (scale == this.scale || getMapAnimator()!!.isStarted) {
+            isDoubleScale = false
             return
         }
         var scaleScrollX = getOffsetScrollXFromScale(x, scale, this.scale)
@@ -231,13 +227,15 @@ abstract class GestureDetectorView : ViewGroup {
      * 两指手势放大
      */
     private fun zoom(x: Int, y: Int, scale: Float) {
-        if (getMapAnimator()!!.isStarted) {
+        if (this.scale == scale) {
             return
         }
+
         var scaleScrollX = getOffsetScrollXFromScale(x, scale, this.scale)
 
         var scaleScrollY = getOffsetScrollYFromScale(y, scale, this.scale)
-        println(scaleScrollX)
+
+
         tx += scaleScrollX
 
         ty += scaleScrollY
@@ -275,13 +273,7 @@ abstract class GestureDetectorView : ViewGroup {
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val width = width
         val height = height
-        if (init) {
-            //偏移到子view中心
-            tx += -(width / 2 - scaleWidth / 2)
-            ty += -(height / 2 - scaleHeight / 2)
-            scrollTo(tx, ty)
-            init = false
-        }
+
         childLeft = 0
         childTop = 0
         for (i in 0 until childCount) {
@@ -291,13 +283,19 @@ abstract class GestureDetectorView : ViewGroup {
             }
 
         }
-
-        requestRender()
+        if (init) {
+            //偏移到子view中心
+            tx += -(width / 2 - scaleWidth / 2)
+            ty += -(height / 2 - scaleHeight / 2)
+            scrollTo(tx, ty)
+            init = false
+        }
+        render()
     }
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
-        requestRender()
+        render()
     }
 
     /**
@@ -520,7 +518,7 @@ abstract class GestureDetectorView : ViewGroup {
     }
 
     private fun onScaleEnd() {
-        requestRender()
+        render()
         for (listener in listeners!!) {
             listener.onScaleEnd(scale)
         }
@@ -539,13 +537,13 @@ abstract class GestureDetectorView : ViewGroup {
     }
 
     private fun onDragEnd() {
-        requestRender()
+        render()
         for (listener in listeners!!) {
             listener.onDragEnd(scrollX, scrollY)
         }
     }
 
-    abstract fun requestRender()
+    abstract fun render()
 
 
     fun addListener(listener: Listener) {

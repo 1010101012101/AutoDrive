@@ -157,12 +157,18 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
 
     }
 
+    fun clearBitmapTileCache() {
+        for (key in bitmapLruCache.getKeys()) {
+            bitmapLruCache.remove(key)
+        }
+        bitmapLruCache.getKeys().clear()
+    }
 
     private fun createBitmapToCache(tileName: String, rectF: RectF) {
         var bitmap = bitmapLruCache.get(tileName)
         if (bitmap == null) {
             bitmap = TileUtils.getEmptyBitmap()
-            bitmapLruCache.put(tileName, bitmap)
+            bitmapLruCache.add(tileName, bitmap)
         }
         canvas.setBitmap(bitmap)
         canvas.drawRect(rectF, paint)
@@ -176,8 +182,9 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         constructor(maxSize: Int) : super(maxSize)
 
         private val keys: HashSet<String>
+
         init {
-            keys=HashSet()
+            keys = HashSet()
         }
 
         fun getKeys(): HashSet<String> {

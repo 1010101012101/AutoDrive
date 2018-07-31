@@ -2,10 +2,11 @@ package com.icegps.mapview.level
 
 import android.content.Context
 import android.graphics.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 class DrawPathView : ChildBaseView {
     private var scale = 1f
-    private var mapPaths: HashSet<MapPath>
+    private var mapPaths: CopyOnWriteArrayList<MapPath>
     private var defaultPaint: Paint
     private var DEFAULT_COLOR = Color.RED
     private var pathMatrix: Matrix
@@ -14,7 +15,7 @@ class DrawPathView : ChildBaseView {
     constructor(context: Context?) : super(context)
 
     init {
-        mapPaths = HashSet()
+        mapPaths = CopyOnWriteArrayList()
         pathMatrix = Matrix()
         matrixPath = Path()
         defaultPaint = Paint()
@@ -26,11 +27,14 @@ class DrawPathView : ChildBaseView {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        for (mapPath in mapPaths) {
+        val iterator = mapPaths.iterator()
+        while (iterator.hasNext()){
+            val mapPath = iterator.next()
             matrixPath.set(mapPath.path)
             matrixPath.transform(pathMatrix)
             canvas!!.drawPath(matrixPath, mapPath.paint)
         }
+
     }
 
     fun addPath(path: Path, paint: Paint?): MapPath {
@@ -40,7 +44,7 @@ class DrawPathView : ChildBaseView {
 
     fun addPath(mapPath: MapPath): MapPath {
         mapPaths.add(mapPath)
-        invalidate()
+        postInvalidate()
         return mapPath
     }
 

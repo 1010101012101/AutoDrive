@@ -1,7 +1,9 @@
 package com.icegps.mapview.level
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import com.icegps.mapview.data.Tile
 
 class DrawBitmapView : ChildBaseView {
@@ -39,6 +41,10 @@ class DrawBitmapView : ChildBaseView {
         clear(tiles)
         this.tiles!!.addAll(tiles)
         invalidate()
+    }
+
+    fun clearTiles() {
+        tiles!!.clear()
     }
 
     private fun clear(tiles: HashSet<Tile>) {

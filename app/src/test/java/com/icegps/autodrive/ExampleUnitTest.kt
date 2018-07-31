@@ -10,7 +10,7 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        println(Math.pow(10.0, 2.0))
+        println(12446+1.2207031E-4)
     }
 
 
