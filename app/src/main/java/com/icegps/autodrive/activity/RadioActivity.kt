@@ -1,22 +1,12 @@
 package com.icegps.autodrive.activity
 
-import android.os.Bundle
-import android.support.annotation.IntegerRes
-import android.support.v7.widget.LinearLayoutManager
-import android.view.View
-import android.widget.AbsListView
 import android.widget.NumberPicker
-import com.chad.library.adapter.base.BaseQuickAdapter
-import com.chad.library.adapter.base.BaseViewHolder
 import com.icegps.autodrive.R
-import com.icegps.autodrive.R.id.*
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.ble.ParseDataBean
-import com.tencent.bugly.proguard.s
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.ParseDataManager
 import kotlinx.android.synthetic.main.activity_radio.*
-import kotlinx.android.synthetic.main.activity_radio.view.*
 import kotlinx.android.synthetic.main.toobar.*
 
 class RadioActivity : BaseActivity() {
@@ -36,14 +26,12 @@ class RadioActivity : BaseActivity() {
             }
             radios.add(value)
         }
-        OnlyBle.addOnParseCompleteCallback(onParseComplete)
-        BleWriteHelper.writeCmd(Cmds.GETRADIO)
+        ParseDataManager.addDataCallback(dataCallbackImpl)
+        DataManager.writeCmd(Cmds.GETRADIO)
         s = arrayOfNulls<String>(radios.size)
         radios.toArray(s)
         numberPickerView.setDisplayedValues(s, false)
         numberPickerView.maxValue = radios.size - 1
-
-
     }
 
     override fun setListener() {
@@ -51,13 +39,14 @@ class RadioActivity : BaseActivity() {
         iv_left.setOnClickListener { finish() }
         numberPickerView.setOnScrollListener { view, scrollState ->
             if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
-                BleWriteHelper.writeCmd(Cmds.SETRADIO, numberPickerView.contentByCurrValue)
+                DataManager.writeCmd(Cmds.SETRADIO, numberPickerView.contentByCurrValue)
             }
         }
 
     }
 
-    var onParseComplete = object : OnlyBle.OnParseComplete {
+    var dataCallbackImpl = object : ParseDataManager.DataCallBackImpl() {
+
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {
             val current = parseDataBean!!.radio.current
             if (current != currentRadio) {
@@ -69,6 +58,6 @@ class RadioActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        OnlyBle.removeParseCompleteCallback(onParseComplete)
+        ParseDataManager.removeDataCallback(dataCallbackImpl)
     }
 }

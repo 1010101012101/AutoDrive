@@ -56,7 +56,7 @@ class DrawPathView : ChildBaseView {
 
     fun clearAllPath() {
         mapPaths.clear()
-        invalidate()
+        postInvalidate()
     }
 
 

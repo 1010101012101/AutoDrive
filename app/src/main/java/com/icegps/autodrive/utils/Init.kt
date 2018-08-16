@@ -4,7 +4,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Handler
 import android.widget.Toast
-import j.m.jblelib.ble.BleHelper.context
 
 class Init {
     companion object {

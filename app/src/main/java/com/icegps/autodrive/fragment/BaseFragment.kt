@@ -5,45 +5,53 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.ParseDataManager
+import com.icegps.jblelib.ble.data.LocationStatus
 
 abstract class BaseFragment : Fragment() {
     lateinit var contentView: View
+    var locationStatus: LocationStatus? = null
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         contentView = childImplView()
-        OnlyBle.addOnParseCompleteCallback(onParseComplete)
+        ParseDataManager.addDataCallback(dataCallbackImpl)
         init()
         return contentView
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        OnlyBle.removeParseCompleteCallback(onParseComplete)
+        ParseDataManager.removeDataCallback(dataCallbackImpl)
     }
 
     abstract fun childImplView(): View
     abstract fun init()
     abstract fun refreshUi(parseDataBean: ParseDataBean?, type: String)
 
-    var onParseComplete = object : OnlyBle.OnParseComplete {
+    var dataCallbackImpl = object : ParseDataManager.DataCallBackImpl() {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {
             refreshUi(parseDataBean, type)
         }
+
+        override fun onLocationData(locationStatus: LocationStatus?) {
+            super.onLocationData(locationStatus)
+            this@BaseFragment.locationStatus = locationStatus
+        }
     }
 
+
     fun setValue(type: String, values: String) {
-        BleWriteHelper.writeCmd(Cmds.SETCONTROLS ,type ,values)
+        DataManager.writeCmd(Cmds.SETCONTROLS, type, values)
     }
 
     fun getValue(type: String) {
-        BleWriteHelper.writeCmd(Cmds.GETCONTROLS , type)
+        DataManager.writeCmd(Cmds.GETCONTROLS, type)
     }
 
 
     fun sendTest(type: String, values: String) {
-        BleWriteHelper.writeCmd(Cmds.SETWORKS ,type,values)
+        DataManager.writeCmd(Cmds.SETWORKS, type, values)
     }
 }

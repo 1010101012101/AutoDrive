@@ -5,9 +5,11 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.widget.RadioGroup
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.fragment.*
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.fragment.InsCourseCalibrationFragment
+import com.icegps.autodrive.fragment.InsSteeringAngleZeroCalibrationFragment
+import com.icegps.autodrive.fragment.InsThresholdValue
 import kotlinx.android.synthetic.main.activity_ins_calibration.*
 import kotlinx.android.synthetic.main.toobar.*
 
@@ -40,7 +42,7 @@ class InsCalibrationActivity : BaseActivity() {
             }
 
             override fun onPageSelected(position: Int) {
-                BleWriteHelper.writeCmd(Cmds.SETWORKS , "0")
+                DataManager.writeCmd(Cmds.SETWORKS , "0")
                 when (position) {
                     0 -> {
                         rb1.isChecked = true

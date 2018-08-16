@@ -23,7 +23,7 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         paint = Paint()
         textPaint = Paint()
         canvas = Canvas()
-        paint.color = Color.parseColor("#63BB88")
+        paint.color = Color.parseColor("#E9F055")
         paint.isFilterBitmap = true
         textPaint.textSize = 16f
         textPaint.isAntiAlias = true
@@ -172,7 +172,7 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         }
         canvas.setBitmap(bitmap)
         canvas.drawRect(rectF, paint)
-        canvas.drawText(tileName, tileLength / 2, tileLength / 2, textPaint)
+//        canvas.drawText(tileName, tileLength / 2, tileLength / 2, textPaint)
     }
 
     /**

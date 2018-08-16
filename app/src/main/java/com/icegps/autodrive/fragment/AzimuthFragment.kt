@@ -6,9 +6,9 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.ParseDataManager
 import kotlinx.android.synthetic.main.fragment_azimuth.*
 import kotlinx.android.synthetic.main.fragment_azimuth.view.*
 import java.lang.Float.parseFloat
@@ -17,7 +17,7 @@ import java.lang.Float.parseFloat
 class AzimuthFragment : BaseFragment() {
     var isTest = false
     override fun refreshUi(parseDataBean: ParseDataBean?, type: String) {
-        contentView.et_practical_azimuth.setText(OnlyBle.parseDataBean!!.controlStatus.get(2).value.toString())
+        contentView.et_practical_azimuth.setText(ParseDataManager.parseDataBean!!.controlStatus.get(2).value.toString())
         if (isTest) {
             differenceValueCalculate()
         }

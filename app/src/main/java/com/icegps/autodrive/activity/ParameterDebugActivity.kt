@@ -5,8 +5,8 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.widget.RadioGroup
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.Cmds
 import com.icegps.autodrive.fragment.*
 import kotlinx.android.synthetic.main.activity_parameter_debug.*
 import kotlinx.android.synthetic.main.toobar.*
@@ -27,7 +27,7 @@ class ParameterDebugActivity : BaseActivity() {
         fragments.add(DistanceFragment())
         tv_title.setText("参数校准")
         viewPager.adapter = fragmentPagerAdapter
-        BleWriteHelper.writeCmd(Cmds.GETCONTROLV , "1" ,"200")
+        DataManager.writeCmd(Cmds.GETCONTROLV , "1" ,"200")
 
     }
 
@@ -42,7 +42,7 @@ class ParameterDebugActivity : BaseActivity() {
             }
 
             override fun onPageSelected(position: Int) {
-                BleWriteHelper.writeCmd(Cmds.SETWORKS ,"0")
+                DataManager.writeCmd(Cmds.SETWORKS ,"0")
                 when (position) {
                     0 -> {
                         rb1.isChecked = true
@@ -88,8 +88,8 @@ class ParameterDebugActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        BleWriteHelper.writeCmd(Cmds.GETCONTROLV , "0" , "0")
-        BleWriteHelper.writeCmd(Cmds.SETWORKS ,"0")
+        DataManager.writeCmd(Cmds.GETCONTROLV , "0" , "0")
+        DataManager.writeCmd(Cmds.SETWORKS ,"0")
     }
 
 

@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
@@ -58,8 +60,11 @@
             android:name=".activity.AddWorkWidthActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".activity.ScanBleActivity"
+            android:name=".activity.BleConnectActivity"
             android:screenOrientation="landscape" />
+        <!--<activity-->
+            <!--android:name=".activity.MapActivity"-->
+            <!--android:screenOrientation="landscape" />-->
     </application>
 
 </manifest>

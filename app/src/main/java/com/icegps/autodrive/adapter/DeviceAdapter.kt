@@ -1,12 +1,10 @@
 package com.icegps.autodrive.adapter
 
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.OnLifecycleEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.icegps.autodrive.R
-import j.m.jblelib.ble.data.BleDevice
+import com.icegps.jblelib.ble.data.BleDevice
 import kotlinx.android.synthetic.main.item_device.view.*
 
 /**

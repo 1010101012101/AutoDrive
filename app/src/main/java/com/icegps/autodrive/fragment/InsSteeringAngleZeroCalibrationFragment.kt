@@ -2,10 +2,9 @@ package com.icegps.autodrive.fragment
 
 import android.view.View
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.ParseDataBean
-import kotlinx.android.synthetic.main.fragment_ins_steering_angle_zero_calibration.*
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
 import kotlinx.android.synthetic.main.fragment_ins_steering_angle_zero_calibration.view.*
 
 class InsSteeringAngleZeroCalibrationFragment : BaseFragment() {
@@ -21,7 +20,7 @@ class InsSteeringAngleZeroCalibrationFragment : BaseFragment() {
 
         })
         contentView.tv_send.setOnClickListener({
-            BleWriteHelper.writeCmd(Cmds.SETINSTALL,"1",contentView.et_center_azimuth.text.toString())
+            DataManager.writeCmd(Cmds.SETINSTALL,"1",contentView.et_center_azimuth.text.toString())
         })
 
     }
@@ -36,7 +35,7 @@ class InsSteeringAngleZeroCalibrationFragment : BaseFragment() {
     }
 
     fun getCenterValue() {
-        BleWriteHelper.writeCmd(Cmds.GETINSTALL , "1")
+        DataManager.writeCmd(Cmds.GETINSTALL , "1")
 
     }
 

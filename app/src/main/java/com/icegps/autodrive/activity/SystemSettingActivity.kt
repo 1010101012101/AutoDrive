@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager
 import com.icegps.autodrive.R
 import com.icegps.autodrive.adapter.SystemSettingAdapter
 import com.icegps.autodrive.utils.Init
-import com.icegps.autodrive.utils.Sp
 import kotlinx.android.synthetic.main.activity_system_setting.*
 import kotlinx.android.synthetic.main.toobar.*
 
@@ -46,7 +45,6 @@ class SystemSettingActivity : BaseActivity() {
                     startActivity(Intent(activity, WorkWidthActivity::class.java))
                 }
                 "清除数据" -> {
-                    Sp.getInstance().putString(ScanBleActivity.MAC, "")
                     Init.showToast("清除成功,下次进入应用将手动选择设备连接")
                 }
                 "出厂校准" -> {

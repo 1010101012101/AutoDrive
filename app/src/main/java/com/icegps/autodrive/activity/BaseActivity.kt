@@ -17,7 +17,6 @@ open abstract class BaseActivity: AppCompatActivity() {
         setContentView(layout())
         init()
         setListener()
-
     }
 
     abstract fun layout():Int

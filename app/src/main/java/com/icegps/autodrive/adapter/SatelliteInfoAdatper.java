@@ -6,13 +6,11 @@ import android.widget.ProgressBar;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
-import com.icegps.autodrive.App;
 import com.icegps.autodrive.R;
 import com.icegps.autodrive.utils.Init;
+import com.icegps.jblelib.ble.data.SatelliteData;
 
 import java.util.List;
-
-import j.m.jblelib.ble.data.SatelliteData;
 
 /**
  * Created by 111 on 2018/1/17.

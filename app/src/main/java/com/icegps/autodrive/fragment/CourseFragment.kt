@@ -4,8 +4,8 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
 import kotlinx.android.synthetic.main.fragment_course.*
 import kotlinx.android.synthetic.main.fragment_course.view.*
 import java.lang.Float

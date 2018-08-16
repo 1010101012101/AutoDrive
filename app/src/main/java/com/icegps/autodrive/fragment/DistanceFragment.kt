@@ -5,11 +5,9 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.ParseDataBean
-import j.m.jblelib.ble.BleHelper
-import j.m.jblelib.ble.BleStatusCallBackImpl.BleStatusCallBackImpl
-import j.m.jblelib.ble.data.LocationStatus
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.jblelib.ble.data.LocationStatus
 import kotlinx.android.synthetic.main.fragment_distance_ring.*
 import kotlinx.android.synthetic.main.fragment_distance_ring.view.*
 
@@ -28,7 +26,6 @@ class DistanceFragment : BaseFragment() {
             contentView.et_value4.setText(parseDataBean!!.controlSetValues.get(4).values[3].toString())
             contentView.et_value5.setText(parseDataBean!!.controlSetValues.get(4).values[4].toString())
         }
-        BleHelper.addBleCallback(bleStatusCallBackImpl)
     }
 
     override fun init() {
@@ -118,20 +115,7 @@ class DistanceFragment : BaseFragment() {
         return view
     }
 
-    var locationStatus: LocationStatus? = null
 
-    var bleStatusCallBackImpl = object : BleStatusCallBackImpl() {
-        override fun onLocationData(locationStatus: LocationStatus) {
-            super.onLocationData(locationStatus)
-//            val latLon2Xy = LatLonUtils.latLon2Xy(doubleArrayOf(locationStatus.latitude, locationStatus.longitude, locationStatus.altitude))
-//            if (this@DistanceFragment.locationStatus==null){
-//                this@DistanceFragment.locationStatus=LocationStatus()
-//            }
-//            this@DistanceFragment.locationStatus?.x = latLon2Xy[0]
-//            this@DistanceFragment.locationStatus?.y = latLon2Xy[1]
-            this@DistanceFragment.locationStatus=locationStatus
-        }
-    }
 
 
     fun showSnackbar(content:String) {

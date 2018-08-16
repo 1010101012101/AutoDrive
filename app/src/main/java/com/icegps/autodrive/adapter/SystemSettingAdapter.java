@@ -5,14 +5,10 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
-import android.widget.CheckBox;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.icegps.autodrive.R;
-import com.icegps.autodrive.ble.BleWriteHelper;
-import com.icegps.autodrive.ble.Cmds;
 
 import java.util.List;
 

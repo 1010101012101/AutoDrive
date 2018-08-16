@@ -44,13 +44,13 @@ abstract class GestureDetectorView : ViewGroup {
      * 最大最小缩放
      */
     private val minScale = 1f
-    private val maxScale = 50f
+    private val maxScale = 8f
 
     private var listeners: HashSet<Listener>? = null
     /**
      * 当前缩放
      */
-    var scale = 1f
+    var scale = 8f
 
     var tx = 0
     var ty = 0

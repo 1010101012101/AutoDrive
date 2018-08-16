@@ -1,28 +1,21 @@
 package com.icegps.autodrive.activity;
 
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.icegps.autodrive.R;
 import com.icegps.autodrive.adapter.SatelliteInfoAdatper;
-import com.icegps.autodrive.ble.BleWriteHelper;
-import com.icegps.autodrive.ble.Cmds;
+import com.icegps.autodrive.ble.DataManager;
+import com.icegps.autodrive.ble.data.Cmds;
+import com.icegps.autodrive.ble.ParseDataManager;
 import com.icegps.autodrive.view.SatelliteInfoView;
+import com.icegps.jblelib.ble.data.SatelliteData;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-
-import j.m.jblelib.ble.BleHelper;
-import j.m.jblelib.ble.BleStatusCallBackImpl.BleStatusCallBackImpl;
-import j.m.jblelib.ble.bleoperation.BleWrite;
-import j.m.jblelib.ble.data.SatelliteData;
 
 /**
  * Created by 111 on 2018/3/16.
@@ -56,8 +49,7 @@ public class SatelliteSignalActivity extends BaseActivity {
 
         findView();
 
-
-        BleWriteHelper.INSTANCE.writeCmd(Cmds.Companion.getSATELLITE(), "1");
+        DataManager.INSTANCE.writeCmd(Cmds.Companion.getSATELLITE(), "1");
 
         gpsAdapter = new SatelliteInfoAdatper(R.layout.item_satellite_info, gpsData);
         bdAdapter = new SatelliteInfoAdatper(R.layout.item_satellite_info, bdData);
@@ -88,23 +80,22 @@ public class SatelliteSignalActivity extends BaseActivity {
     }
 
 
-
-
     @Override
     public void setListener() {
-        BleHelper.INSTANCE.addBleCallback(bleStatusCallBack);
+
+        ParseDataManager.INSTANCE.addDataCallback(dataCallBack);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BleHelper.INSTANCE.removeBleCallback(bleStatusCallBack);
-        BleWriteHelper.INSTANCE.writeCmd(Cmds.Companion.getSATELLITE(), "0");
+        ParseDataManager.INSTANCE.removeDataCallback(dataCallBack);
+        DataManager.INSTANCE.writeCmd(Cmds.Companion.getSATELLITE(), "0");
     }
 
-    BleStatusCallBackImpl bleStatusCallBack = new BleStatusCallBackImpl() {
+    ParseDataManager.DataCallBackImpl dataCallBack = new ParseDataManager.DataCallBackImpl() {
         @Override
-        public void onSatelliteData(@NotNull ArrayList<SatelliteData> satellites, byte satelliteType) {
+        public void onSatelliteData(@NotNull ArrayList<SatelliteData> satellites, @NotNull  Byte satelliteType) {
             super.onSatelliteData(satellites, satelliteType);
             switch (satelliteType) {
                 case 0:

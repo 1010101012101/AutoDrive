@@ -17,12 +17,14 @@ class MapView : GestureDetectorView {
     private var drawPathView: DrawPathView
     private var drawBackgroundLineView: DrawBackgroundLineView
     private var tiles: HashSet<Tile> = HashSet()
+    private var bgTiles: HashSet<Tile> = HashSet()
     private var viewport: Rect
     private var stateSnapshot: StateSnapshot? = null
-    private var bitmap1: Bitmap
-    private var bitmap2: Bitmap
+    private var bgStateSnapshot: StateSnapshot? = null
+    private lateinit var bgBitmap: Bitmap
     var bitmapProvider: BitmapProvider? = null
     var tileLength = 200
+    var bgTileLength = 400
     var scaleTileLength = tileLength.toFloat()
         get() {
             return field * scale
@@ -33,21 +35,42 @@ class MapView : GestureDetectorView {
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     init {
-
-        bitmap1 = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_4444)
-        bitmap2 = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_4444)
-        Canvas(bitmap1).drawColor(Color.BLUE)
-        Canvas(bitmap2).drawColor(Color.BLACK)
-
+        initBgBitmap()
         viewport = Rect()
-
-
         drawBackgroundLineView = DrawBackgroundLineView(context)
         drawBitmapView = DrawBitmapView(context)
         drawPathView = DrawPathView(context)
         markerLayout = MarkerLayout(context)
-
+        scaleChange(scale)
         addLevelView()
+    }
+
+    fun initBgBitmap() {
+        bgBitmap = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bgBitmap)
+        canvas.drawColor(Color.parseColor("#59A522"))
+        val paint = Paint()
+        paint.strokeWidth = 20f
+        paint.color = Color.parseColor("#33000000")
+        var count = 4
+        val gap = bgTileLength / count
+
+        for (i in 1..count) {
+            canvas.drawLine(
+                    gap * i.toFloat() - gap / 2,
+                    0f,
+                    gap * i.toFloat() - gap / 2,
+                    bgTileLength.toFloat(),
+                    paint)
+        }
+        for (i in 1..count) {
+            canvas.drawLine(
+                    0f,
+                    gap * i.toFloat() - gap / 2,
+                    bgTileLength.toFloat(),
+                    gap * i.toFloat() - gap / 2,
+                    paint)
+        }
     }
 
     private fun addLevelView() {
@@ -62,6 +85,13 @@ class MapView : GestureDetectorView {
         drawBitmapView.setScale(scale)
         drawPathView.setScale(scale)
         markerLayout.setScale(scale)
+    }
+
+    fun setRotate(rotate: Float, x: Float, y: Float) {
+        drawBitmapView.rotation = rotate
+        drawBitmapView.rotation = rotate
+        drawPathView.rotation = rotate
+        markerLayout.rotation = rotate
     }
 
     /**
@@ -161,28 +191,17 @@ class MapView : GestureDetectorView {
         var top = scrollY - scaleHeight / 2
         var bottom = top + height
         viewport.set(left, top, right, bottom)
-        if (computeCurrentState()) {
+        if (computeCurrentState() || computeCurrentState1()) {
             deleteOldAddNewTiles()
         }
     }
 
-    /**
-     * 强制更新当前偏移量
-     */
-    private fun forcedComputeViewport() {
-        var left = scrollX - scaleWidth / 2
-        var right = left + width
-        var top = scrollY - scaleHeight / 2
-        var bottom = top + height
-        viewport.set(left, top, right, bottom)
-        deleteOldAddNewTiles()
-    }
 
     /**
      * 刷新方块
      */
     private fun renderTiles() {
-        drawBitmapView.renderTiles(tiles)
+        drawBitmapView.renderTiles(tiles, bgTiles)
     }
 
 
@@ -196,17 +215,31 @@ class MapView : GestureDetectorView {
         val columnEnd = Math.ceil((viewport.right.toDouble() / scaleTileLength)).toInt()
         val stateSnapshot = StateSnapshot(rowStart, rowEnd, columnStart, columnEnd)
         val sameState = stateSnapshot.equals(this.stateSnapshot)
-
-
         this.stateSnapshot = stateSnapshot
         return !sameState
     }
+
+    /**
+     * 计算当前屏幕所需要的背景方块
+     */
+    private fun computeCurrentState1(): Boolean {
+        val rowStart = Math.floor((viewport.top.toDouble() / bgTileLength)).toInt()
+        val rowEnd = Math.ceil((viewport.bottom.toDouble() / bgTileLength)).toInt()
+        val columnStart = Math.floor((viewport.left.toDouble() / bgTileLength)).toInt()
+        val columnEnd = Math.ceil((viewport.right.toDouble() / bgTileLength)).toInt()
+        val stateSnapshot = StateSnapshot(rowStart, rowEnd, columnStart, columnEnd)
+        val sameState = stateSnapshot.equals(this.bgStateSnapshot)
+        this.bgStateSnapshot = stateSnapshot
+        return !sameState
+    }
+
 
     /**
      * 删除旧的方块添加新的方块
      */
     private fun deleteOldAddNewTiles() {
         tiles.clear()
+        bgTiles.clear()
         requestGetTile()
     }
 
@@ -230,23 +263,19 @@ class MapView : GestureDetectorView {
                         }
                     }
 
-//                if (column % 2 == 0) {
-//                    if (row % 2 == 0) {
-//                        tiles.add(Tile(row, column, left, top, right, bottom, bitmap1))
-//
-//                    } else {
-//                        tiles.add(Tile(row, column, left, top, right, bottom, bitmap2))
-//
-//                    }
-//                } else {
-//                    if (row % 2 == 0) {
-//                        tiles.add(Tile(row, column, left, top, right, bottom, bitmap2))
-//
-//                    } else {
-//                        tiles.add(Tile(row, column, left, top, right, bottom, bitmap1))
-//
-//                    }
-//                }
+                }
+            }
+
+        if (bgStateSnapshot != null)
+            for (column in bgStateSnapshot!!.columnStart..bgStateSnapshot!!.columnEnd) {
+                for (row in bgStateSnapshot!!.rowStart..bgStateSnapshot!!.rowEnd) {
+                    var top = row * bgTileLength.toFloat()
+                    var bottom = top + bgTileLength.toFloat()
+                    var left = column * bgTileLength.toFloat()
+                    var right = left + bgTileLength.toFloat()
+                    val tile = Tile(row, column, left, top, right, bottom)
+                    tile.bitmap = bgBitmap
+                    bgTiles.add(tile)
                 }
             }
 
@@ -269,9 +298,13 @@ class MapView : GestureDetectorView {
 
     class StateSnapshot {
         var rowStart: Int = 0
+            get() = field - 1
         var rowEnd: Int = 0
+            get() = field + 1
         var columnStart: Int = 0
+            get() = field - 1
         var columnEnd: Int = 0
+            get() = field + 1
 
         constructor(rowStart: Int, rowEnd: Int, columnStart: Int, columnEnd: Int) {
             this.rowStart = rowStart

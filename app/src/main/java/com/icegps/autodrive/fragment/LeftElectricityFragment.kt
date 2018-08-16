@@ -3,15 +3,12 @@ package com.icegps.autodrive.fragment
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.view.TextureView
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.R.id.*
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.ParseDataManager
 import kotlinx.android.synthetic.main.fragment_left_electricity.*
 import kotlinx.android.synthetic.main.fragment_left_electricity.view.*
 import java.lang.Float.parseFloat
@@ -20,7 +17,7 @@ import java.lang.Float.parseFloat
 class LeftElectricityFragment : BaseFragment() {
     var isTest = false
     override fun refreshUi(parseDataBean: ParseDataBean?, type: String) {
-        contentView.et_electricity_practical.setText(OnlyBle.parseDataBean!!.controlStatus.get(0).value.toString())
+        contentView.et_electricity_practical.setText(ParseDataManager.parseDataBean!!.controlStatus.get(0).value.toString())
         if (isTest) {
             differenceValueCalculate()
         }

@@ -7,16 +7,16 @@ import android.graphics.Path
 import android.view.View
 import android.widget.ImageView
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.Cmds
 import com.icegps.autodrive.map.data.TestData
 import com.icegps.autodrive.map.utils.BitmapProviderUtils
 import com.icegps.autodrive.map.utils.MathUtils
 import com.icegps.autodrive.map.utils.ThreadPool
+import com.icegps.jblelib.ble.data.LocationStatus
 import com.icegps.mapview.GestureDetectorView
 import com.icegps.mapview.MapView
 import com.icegps.mapview.utils.ScaleHelper
-import j.m.jblelib.ble.data.LocationStatus
 
 class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var mapview: MapView
@@ -65,14 +65,16 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     private var isStartWork = false
     private var testData: TestData
-    private var threadPool:ThreadPool
+    private var threadPool: ThreadPool
+
     init {
         this.mapview = mapview
         this.activity = activity
         this.testData = testData
+        scale = mapview.scale
         datumLine = DoubleArray(4)
         line = FloatArray(4)
-        threadPool= ThreadPool.getInstance()
+        threadPool = ThreadPool.getInstance()
         //添加拖拉机图标
         createMarker()
         //设置地图大小
@@ -300,7 +302,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
      * 发送AB点
      */
     fun sendAb2Blue() {
-        BleWriteHelper.writeCmd(
+        DataManager.writeCmd(
                 Cmds.SETWORKS,
                 "5",
                 "0",
@@ -348,8 +350,8 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     fun setOffset(offset: Float) {
         datumLine = MathUtils.offsetLine(datumLine, offset)
-        mapview.moveMarker(datumLine[0],datumLine[1],ivMarkerA!!)
-        mapview.moveMarker(datumLine[2],datumLine[3],ivMarkerB!!)
+        mapview.moveMarker(datumLine[0], datumLine[1], ivMarkerA!!)
+        mapview.moveMarker(datumLine[2], datumLine[3], ivMarkerB!!)
         setWorkArea(centerLinePosition, moveLine, scale)
     }
 

@@ -2,9 +2,9 @@ package com.icegps.autodrive.fragment
 
 import android.view.View
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
 import kotlinx.android.synthetic.main.fragment_ins_threshold_value.view.*
 
 class InsThresholdValue : BaseFragment() {
@@ -26,10 +26,10 @@ class InsThresholdValue : BaseFragment() {
         })
 
         contentView.tv_mpa_send.setOnClickListener({
-            BleWriteHelper.writeCmd(Cmds.SETTHRESHOLD ,"1" , contentView.et_mpa_alert.text.toString())
+            DataManager.writeCmd(Cmds.SETTHRESHOLD ,"1" , contentView.et_mpa_alert.text.toString())
         })
         contentView.tv_temperature_send.setOnClickListener({
-            BleWriteHelper.writeCmd(Cmds.SETTHRESHOLD , "2", contentView.et_temperature_alert.text.toString())
+            DataManager.writeCmd(Cmds.SETTHRESHOLD , "2", contentView.et_temperature_alert.text.toString())
         })
     }
 
@@ -46,11 +46,11 @@ class InsThresholdValue : BaseFragment() {
     }
 
     fun getMPa() {
-        BleWriteHelper.writeCmd(Cmds.GETTHRESHOLD ,"1")
+        DataManager.writeCmd(Cmds.GETTHRESHOLD ,"1")
     }
 
     fun getTemperatureAlert() {
-        BleWriteHelper.writeCmd(Cmds.GETTHRESHOLD , "2")
+        DataManager.writeCmd(Cmds.GETTHRESHOLD , "2")
     }
 
 }

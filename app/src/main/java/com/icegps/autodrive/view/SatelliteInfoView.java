@@ -14,7 +14,7 @@ import com.icegps.autodrive.R;
 
 import java.util.ArrayList;
 
-import j.m.jblelib.ble.data.SatelliteData;
+import com.icegps.jblelib.ble.data.SatelliteData;
 
 /**
  * Created by 111 on 2018/1/12.

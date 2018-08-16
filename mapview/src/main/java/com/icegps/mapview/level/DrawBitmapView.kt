@@ -1,5 +1,6 @@
 package com.icegps.mapview.level
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -9,16 +10,13 @@ import com.icegps.mapview.data.Tile
 class DrawBitmapView : ChildBaseView {
     private var scale = 1f
     private var tiles: HashSet<Tile>? = null
-        set(value) {
-            field = value
-            invalidate()
-        }
-
+    private var bgTiles: HashSet<Tile>? = null
     constructor(context: Context?) : super(context)
 
 
     init {
-        this.tiles = HashSet()
+        tiles = HashSet()
+        bgTiles = HashSet()
     }
 
     /**
@@ -29,17 +27,24 @@ class DrawBitmapView : ChildBaseView {
         requestLayout()
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        bgTiles!!.forEach {
+            canvas!!.drawBitmap(it.bitmap, null, RectF(it.left, it.top, it.right, it.bottom), Paint())
+        }
+
         canvas!!.scale(scale, scale)
+
         tiles!!.forEach {
             canvas!!.drawBitmap(it.bitmap, null, RectF(it.left, it.top, it.right, it.bottom), Paint())
         }
     }
 
-    fun renderTiles(tiles: HashSet<Tile>) {
-        clear(tiles)
+    fun renderTiles(tiles: HashSet<Tile>, bgTiles: HashSet<Tile>) {
+        clear(tiles, bgTiles)
         this.tiles!!.addAll(tiles)
+        this.bgTiles!!.addAll(bgTiles)
         invalidate()
     }
 
@@ -47,12 +52,20 @@ class DrawBitmapView : ChildBaseView {
         tiles!!.clear()
     }
 
-    private fun clear(tiles: HashSet<Tile>) {
+    private fun clear(tiles: HashSet<Tile>, bgTiles: HashSet<Tile>) {
         val oldTileIterator = this.tiles!!.iterator()
         while (oldTileIterator.hasNext()) {
             val tile = oldTileIterator.next()
             if (!tiles.contains(tile)) {
                 oldTileIterator.remove()
+            }
+        }
+
+        val oldBgTileIterator = this.bgTiles!!.iterator()
+        while (oldBgTileIterator.hasNext()) {
+            val tile = oldBgTileIterator.next()
+            if (!tiles.contains(tile)) {
+                oldBgTileIterator.remove()
             }
         }
     }

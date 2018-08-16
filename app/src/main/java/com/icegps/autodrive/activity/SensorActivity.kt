@@ -6,10 +6,10 @@ import android.text.TextUtils
 import android.widget.EditText
 import android.widget.RadioGroup
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.BleWriteHelper
-import com.icegps.autodrive.ble.Cmds
-import com.icegps.autodrive.ble.OnlyBle
-import com.icegps.autodrive.ble.ParseDataBean
+import com.icegps.autodrive.ble.DataManager
+import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.ParseDataManager
 import com.icegps.autodrive.utils.Init
 import kotlinx.android.synthetic.main.activity_sensor.*
 import kotlinx.android.synthetic.main.toobar.*
@@ -39,8 +39,8 @@ class SensorActivity : BaseActivity(), RadioGroup.OnCheckedChangeListener {
 
     override fun init() {
         checkedId = rb1.id
-        BleWriteHelper.writeCmd(Cmds.GETSENSORV, "1", "200")
-        OnlyBle.addOnParseCompleteCallback(onParseComplete)
+        DataManager.writeCmd(Cmds.GETSENSORV, "1", "200")
+        ParseDataManager.addDataCallback(dataCallback)
         setListener()
         tv_title.setText("传感器校准")
 
@@ -130,7 +130,7 @@ class SensorActivity : BaseActivity(), RadioGroup.OnCheckedChangeListener {
                     k += (v2 / (ad2 - ad0))
                     k /= 2.0f
 
-                    BleWriteHelper.writeCmd(Cmds.SETSENSORS, currentSel.toString(), ad0.toString(), k.toString())
+                    DataManager.writeCmd(Cmds.SETSENSORS, currentSel.toString(), ad0.toString(), k.toString())
                     showDialog4()
                 }).show()
     }
@@ -170,11 +170,11 @@ class SensorActivity : BaseActivity(), RadioGroup.OnCheckedChangeListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        BleWriteHelper.writeCmd(Cmds.GETSENSORV, "0", "0")
-        OnlyBle.addOnParseCompleteCallback(onParseComplete)
+        DataManager.writeCmd(Cmds.GETSENSORV, "0", "0")
+        ParseDataManager.removeDataCallback(dataCallback)
     }
 
-    var onParseComplete = object : OnlyBle.OnParseComplete {
+    var dataCallback = object : ParseDataManager.DataCallBackImpl() {
         override fun onComplete(parseDataBean: ParseDataBean?, type: String) {
             this@SensorActivity.parseDataBean = parseDataBean
             ref()
