@@ -91,9 +91,9 @@ class MapActivity : BaseActivity() {
     }
 
     private fun testData() {
-        testData!!.getTestData {
-            mapUtils.run(locationStatus = it)
-        }
+//        testData!!.getTestData {
+//            mapUtils.run(locationStatus = it)
+//        }
     }
 
     override fun setListener() {

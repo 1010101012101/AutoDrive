@@ -1,12 +1,9 @@
 package com.icegps.autodrive.activity
 
-import android.provider.SyncStateContract.Helpers.insert
-import android.text.TextUtils
 import android.view.View
 import android.widget.EditText
 import com.icegps.autodrive.ListenerImpl.TextWatcherImpl
 import com.icegps.autodrive.R
-import com.icegps.autodrive.R.id.*
 import com.icegps.autodrive.data.WorkWidth
 import com.icegps.autodrive.gen.GreenDaoUtils
 import com.icegps.autodrive.utils.Init

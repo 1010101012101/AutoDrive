@@ -45,32 +45,58 @@ class MapView : GestureDetectorView {
         addLevelView()
     }
 
+    /**
+     * 初始化背景图片
+     */
     fun initBgBitmap() {
         bgBitmap = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bgBitmap)
         canvas.drawColor(Color.parseColor("#59A522"))
         val paint = Paint()
         paint.strokeWidth = 20f
-        paint.color = Color.parseColor("#33000000")
+        paint.color = Color.parseColor("#22000000")
         var count = 4
         val gap = bgTileLength / count
+        for (i in 0 until count) {
+            for (j in 0 until count) {
+                if (i % 2 == 0 && j % 2 == 0) {
+                    canvas.drawRect(
+                            gap * i.toFloat(),
+                            gap * j.toFloat(),
+                            gap * i.toFloat() + gap,
+                            gap * j.toFloat() + gap,
+                            paint
+                    )
+                }
+                if (i % 2 == 1 && j % 2 == 1) {
+                    canvas.drawRect(
+                            gap * i.toFloat(),
+                            gap * j.toFloat(),
+                            gap * i.toFloat() + gap,
+                            gap * j.toFloat() + gap,
+                            paint
+                    )
+                }
 
-        for (i in 1..count) {
-            canvas.drawLine(
-                    gap * i.toFloat() - gap / 2,
-                    0f,
-                    gap * i.toFloat() - gap / 2,
-                    bgTileLength.toFloat(),
-                    paint)
+            }
         }
-        for (i in 1..count) {
-            canvas.drawLine(
-                    0f,
-                    gap * i.toFloat() - gap / 2,
-                    bgTileLength.toFloat(),
-                    gap * i.toFloat() - gap / 2,
-                    paint)
-        }
+
+//        for (i in 1..count) {
+//            canvas.drawLine(
+//                    gap * i.toFloat() - gap / 2,
+//                    0f,
+//                    gap * i.toFloat() - gap / 2,
+//                    bgTileLength.toFloat(),
+//                    paint)
+//        }
+//        for (i in 1..count) {
+//            canvas.drawLine(
+//                    0f,
+//                    gap * i.toFloat() - gap / 2,
+//                    bgTileLength.toFloat(),
+//                    gap * i.toFloat() - gap / 2,
+//                    paint)
+//        }
     }
 
     private fun addLevelView() {
@@ -298,13 +324,9 @@ class MapView : GestureDetectorView {
 
     class StateSnapshot {
         var rowStart: Int = 0
-            get() = field - 1
         var rowEnd: Int = 0
-            get() = field + 1
         var columnStart: Int = 0
-            get() = field - 1
         var columnEnd: Int = 0
-            get() = field + 1
 
         constructor(rowStart: Int, rowEnd: Int, columnStart: Int, columnEnd: Int) {
             this.rowStart = rowStart
