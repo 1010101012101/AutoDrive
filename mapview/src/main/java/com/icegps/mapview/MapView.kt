@@ -55,7 +55,7 @@ class MapView : GestureDetectorView {
         val paint = Paint()
         paint.strokeWidth = 20f
         paint.color = Color.parseColor("#22000000")
-        var count = 4
+        var count = 8
         val gap = bgTileLength / count
         for (i in 0 until count) {
             for (j in 0 until count) {

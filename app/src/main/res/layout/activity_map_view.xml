@@ -74,6 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:layout_marginTop="10dp"
             android:background="@drawable/shape_write"
             android:padding="5dp">
 
@@ -122,7 +123,7 @@
                 android:layout_marginRight="10dp"
                 android:text="0"
                 android:textColor="@color/colorAccent"
-                android:textSize="24sp" />
+                android:textSize="36sp" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -185,14 +186,14 @@
                     android:layout_gravity="center_horizontal"
                     android:text="0"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="km/h"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
 
@@ -339,7 +340,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
-                android:background="@drawable/sel_btn_a_b_black"
+                android:background="@drawable/sel_btn_gray"
                 android:clickable="false"
                 android:padding="15dp"
                 android:src="@drawable/sel_iv_a_mark" />
@@ -351,7 +352,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="5dp"
-                android:background="@drawable/sel_btn_a_b_black"
+                android:background="@drawable/sel_btn_gray"
                 android:clickable="false"
                 android:padding="15dp"
                 android:src="@drawable/sel_iv_b_mark" />
@@ -372,15 +373,45 @@
         android:paddingRight="10dp"
         android:paddingTop="5dp"
         android:text="新建作业后才能设置AB点"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
 
-    <ImageView
-        android:id="@+id/iv_wheel"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginRight="10dp"
-        android:src="@drawable/level_wheel" />
+        android:layout_marginRight="10dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_ruler"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="100M"
+                android:textColor="#FFFFFF"
+                android:textSize="12dp" />
+
+            <com.icegps.autodrive.view.RulerView
+                android:id="@+id/rulerView"
+                android:layout_width="200px"
+                android:layout_height="10dp"
+                android:layout_gravity="center" />
+        </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/iv_wheel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/level_wheel" />
+    </LinearLayout>
 </RelativeLayout>

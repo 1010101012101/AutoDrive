@@ -23,7 +23,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var activity: Activity
     private var tileLength = 200f
     var workWidth = 3F
-    private var mapAccuracy = 0.1f
+    var mapAccuracy = 0.1f
     private var tractors: View? = null
     private var ivMarkerA: View? = null
     private var ivMarkerB: View? = null

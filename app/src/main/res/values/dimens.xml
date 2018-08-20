@@ -5,4 +5,5 @@
     <dimen name="sp8">8sp</dimen>
     <dimen name="dp5">5dp</dimen>
     <dimen name="sp_14">14sp</dimen>
+    <dimen name="lineWidth">2dp</dimen>
 </resources>

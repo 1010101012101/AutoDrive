@@ -28,6 +28,7 @@ import com.icegps.autodrive.utils.Init
 import com.icegps.autodrive.utils.StringUtils
 import com.icegps.jblelib.ble.BleHelper
 import com.icegps.jblelib.ble.data.LocationStatus
+import com.icegps.mapview.GestureDetectorView
 import com.icegps.serialportlib.serialport.SerialPortHelper
 import kotlinx.android.synthetic.main.activity_map_view.*
 import kotlinx.android.synthetic.main.dialog_new_work.view.*
@@ -52,11 +53,10 @@ class MapActivity : BaseActivity() {
     }
 
     override fun init() {
-
         ParseDataManager.addDataCallback(dataCallBackImpl)
-
         testData = TestData()
         mapUtils = MapUtils(map_view, activity, testData!!)
+        tv_ruler.setText(Math.round(mapUtils.mapAccuracy / map_view.scale * 200f).toString() + "M")
         testData()
         setIvABEnab(false)
         initBleCmd()
@@ -101,7 +101,6 @@ class MapActivity : BaseActivity() {
         iv_wheel.setOnClickListener {
             DataManager.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
         }
-
         tv_signal.setOnClickListener { startActivity(Intent(activity, SatelliteSignalActivity::class.java)) }
 
         tv_setting.setOnClickListener { startActivity(Intent(activity, SystemSettingActivity::class.java)) }
@@ -191,7 +190,7 @@ class MapActivity : BaseActivity() {
                         override fun onClick(dialog: DialogInterface?, which: Int) {
                             try {
                                 val offset = et.text.toString().toFloat()
-                                mapUtils.setOffset(offset /10)
+                                mapUtils.setOffset(offset / 10)
                             } catch (e: NumberFormatException) {
 
                             }
@@ -208,7 +207,7 @@ class MapActivity : BaseActivity() {
 
 
         rrrrr.setOnClickListener {
-            map_view.setRotate(60f,0f,0f)
+            map_view.setRotate(60f, 0f, 0f)
         }
     }
 
@@ -217,6 +216,7 @@ class MapActivity : BaseActivity() {
         workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
         workModeAdapter!!.notifyDataSetChanged()
         workModeContentView?.tv_width?.setText(workWidths!!.get(selMode)!!.workWidth.toString())
+        map_view.addListener(mapListenerImpl)
     }
 
 
@@ -230,13 +230,13 @@ class MapActivity : BaseActivity() {
 
         iv_set_a_point.setBackground(
                 if (enab)
-                    ContextCompat.getDrawable(activity, R.drawable.sel_btn_green)
+                    ContextCompat.getDrawable(activity, R.drawable.sel_btn_gray)
                 else
                     ContextCompat.getDrawable(activity, R.drawable.sel_btn_a_b_black))
 
         iv_set_b_point.setBackground(
                 if (enab)
-                    ContextCompat.getDrawable(activity, R.drawable.sel_btn_green)
+                    ContextCompat.getDrawable(activity, R.drawable.sel_btn_gray)
                 else
                     ContextCompat.getDrawable(activity, R.drawable.sel_btn_a_b_black))
 
@@ -269,6 +269,7 @@ class MapActivity : BaseActivity() {
         super.onDestroy()
         ParseDataManager.removeDataCallback(dataCallBackImpl)
         BleHelper.disconnect()
+        map_view.removeListener(mapListenerImpl)
         SerialPortHelper.closeSerialPort()
         if (testData != null)
             testData!!.startOrStop(true)
@@ -364,5 +365,15 @@ class MapActivity : BaseActivity() {
         iv_right_offset_red.visibility = if (offset > 4) View.VISIBLE else View.INVISIBLE
     }
 
+    private var oldScale = 0f
+    private var mapListenerImpl = object : GestureDetectorView.ListenerImpl() {
+        override fun onScaling(scale: Float) {
+            super.onScaling(scale)
+            if (oldScale != scale) {
+                tv_ruler.setText(Math.round(mapUtils.mapAccuracy / scale * 200f).toString() + "M")
+                oldScale = scale
+            }
+        }
+    }
 
 }
