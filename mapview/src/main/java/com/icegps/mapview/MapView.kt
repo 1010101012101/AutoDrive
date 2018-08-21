@@ -59,7 +59,7 @@ class MapView : GestureDetectorView {
         val gap = bgTileLength / count
         for (i in 0 until count) {
             for (j in 0 until count) {
-                if (i % 2 == 0 && j % 2 == 0) {
+                if ((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
                     canvas.drawRect(
                             gap * i.toFloat(),
                             gap * j.toFloat(),
@@ -68,35 +68,8 @@ class MapView : GestureDetectorView {
                             paint
                     )
                 }
-                if (i % 2 == 1 && j % 2 == 1) {
-                    canvas.drawRect(
-                            gap * i.toFloat(),
-                            gap * j.toFloat(),
-                            gap * i.toFloat() + gap,
-                            gap * j.toFloat() + gap,
-                            paint
-                    )
-                }
-
             }
         }
-
-//        for (i in 1..count) {
-//            canvas.drawLine(
-//                    gap * i.toFloat() - gap / 2,
-//                    0f,
-//                    gap * i.toFloat() - gap / 2,
-//                    bgTileLength.toFloat(),
-//                    paint)
-//        }
-//        for (i in 1..count) {
-//            canvas.drawLine(
-//                    0f,
-//                    gap * i.toFloat() - gap / 2,
-//                    bgTileLength.toFloat(),
-//                    gap * i.toFloat() - gap / 2,
-//                    paint)
-//        }
     }
 
     private fun addLevelView() {

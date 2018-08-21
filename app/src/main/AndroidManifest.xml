@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.SplashActivity"
+            android:name=".activity.MapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -62,9 +62,9 @@
         <activity
             android:name=".activity.BleConnectActivity"
             android:screenOrientation="landscape" />
-        <activity
-            android:name=".activity.MapActivity"
-            android:screenOrientation="landscape" />
+        <!--<activity-->
+            <!--android:name=".activity.MapActivity"-->
+            <!--android:screenOrientation="landscape" />-->
     </application>
 
 </manifest>

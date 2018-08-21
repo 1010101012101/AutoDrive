@@ -56,7 +56,7 @@ class MapActivity : BaseActivity() {
         ParseDataManager.addDataCallback(dataCallBackImpl)
         testData = TestData()
         mapUtils = MapUtils(map_view, activity, testData!!)
-        tv_ruler.setText(Math.round(mapUtils.mapAccuracy / map_view.scale * 200f).toString() + "M")
+        setRulerValue(map_view.scale)
         testData()
         setIvABEnab(false)
         initBleCmd()
@@ -82,6 +82,10 @@ class MapActivity : BaseActivity() {
 
     }
 
+    fun setRulerValue(scale: Float) {
+        tv_ruler.setText(Math.round(mapUtils.mapAccuracy / scale * 200f).toString() + "M")
+    }
+
     private fun initBleCmd() {
         DataManager.writeCmd(Cmds.CONNECT)
         DataManager.writeCmd(Cmds.GETSENSORV, "0", "0")
@@ -91,9 +95,9 @@ class MapActivity : BaseActivity() {
     }
 
     private fun testData() {
-//        testData!!.getTestData {
-//            mapUtils.run(locationStatus = it)
-//        }
+        testData!!.getTestData {
+            mapUtils.run(locationStatus = it)
+        }
     }
 
     override fun setListener() {
@@ -370,7 +374,7 @@ class MapActivity : BaseActivity() {
         override fun onScaling(scale: Float) {
             super.onScaling(scale)
             if (oldScale != scale) {
-                tv_ruler.setText(Math.round(mapUtils.mapAccuracy / scale * 200f).toString() + "M")
+                setRulerValue(scale)
                 oldScale = scale
             }
         }
