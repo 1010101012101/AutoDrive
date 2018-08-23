@@ -5,21 +5,22 @@ import android.util.LruCache
 import com.icegps.autodrive.utils.Init
 import com.icegps.mapview.data.Tile
 import com.icegps.mapview.utils.BitmapProvider
+import timber.log.Timber
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Float) : BitmapProvider {
+class BitmapProviderUtils() : BitmapProvider {
     private var bitmapLruCache: BitmapLruCache
-    private var tileLength: Float = 0f
-    private var workWidth: Float = 0f
-    private var mapAccuracy: Float = 0f
     private var paint: Paint
     private var textPaint: Paint
     private var canvas: Canvas
+    private var bgBitmap: Bitmap? = null
+    var measuredTime: Long = 0
+    private var newSingleThreadExecutor: ExecutorService
 
     init {
-        this.tileLength = tileLength
-        this.workWidth = workWidth
-        this.mapAccuracy = mapAccuracy
+        newSingleThreadExecutor = Executors.newSingleThreadExecutor()
         paint = Paint()
         textPaint = Paint()
         canvas = Canvas()
@@ -31,10 +32,29 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         bitmapLruCache = BitmapLruCache(Init.getMemoryCacheSize())
     }
 
+    /**
+     * 受缩放影响
+     */
     override fun getBitmap(tile: Tile): Bitmap? {
         val bitmapName = StringBuffer().append(tile.column).append("_").append(tile.row).toString()
-        val bitmap = bitmapLruCache.get(bitmapName)
+        var bitmap = bitmapLruCache.get(bitmapName)
+        if (bitmap == null && measuredTime != 0L) {
+            newSingleThreadExecutor.execute(Runnable {
+                bitmap = FileUtils.setDir(measuredTime!!).getBitmapBySdCard(bitmapName)
+                if (bitmap != null) {
+                    bitmapLruCache.add(bitmapName, bitmap)
+                    onLoadSDBitmap?.onCompleted()
+                }
+            })
+        }
         return bitmap
+    }
+
+    /**
+     * 不受缩放影响
+     */
+    override fun getNotAffectedByScaleBitmap(tile: Tile): Bitmap? {
+        return getBgBitmap(tile.tileLenght)
     }
 
     /**
@@ -58,7 +78,7 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
      *
      * 3,调用canvas.drawRect将每一个rectF都绘制到bitmap上去.
      */
-    fun createBitmapByXy(x: Double, y: Double) {
+    fun createBitmapByXy(x: Double, y: Double, tileLength: Float, workWidth: Float, mapAccuracy: Float) {
         //车宽的一般所需要的像素
         val workWidthHalfPixel = (workWidth / mapAccuracy) / 2
         //当前的x减掉掉车宽的一半 计算出车宽左边缘是哪个bitmap方块
@@ -157,6 +177,9 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
 
     }
 
+    /**
+     * 清空cache
+     */
     fun clearBitmapTileCache() {
         for (key in bitmapLruCache.getKeys()) {
             bitmapLruCache.remove(key)
@@ -164,21 +187,73 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         bitmapLruCache.getKeys().clear()
     }
 
+    /**
+     * 创建bitmap并存入cache
+     */
     private fun createBitmapToCache(tileName: String, rectF: RectF) {
         var bitmap = bitmapLruCache.get(tileName)
         if (bitmap == null) {
             bitmap = TileUtils.getEmptyBitmap()
             bitmapLruCache.add(tileName, bitmap)
+            bitmapLruCache.getKeys().add(tileName)
         }
         canvas.setBitmap(bitmap)
         canvas.drawRect(rectF, paint)
-//        canvas.drawText(tileName, tileLength / 2, tileLength / 2, textPaint)
+    }
+
+
+    /**
+     * 初始化背景图片
+     */
+    fun getBgBitmap(tileLength: Int): Bitmap? {
+        if (bgBitmap == null) {
+            bgBitmap = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bgBitmap)
+            canvas.drawColor(Color.parseColor("#59A522"))
+            val paint = Paint()
+            paint.strokeWidth = 20f
+            paint.color = Color.parseColor("#22000000")
+            var count = 4
+            val gap = tileLength / count
+            for (i in 0 until count) {
+                for (j in 0 until count) {
+                    if ((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
+                        canvas.drawRect(
+                                gap * i.toFloat(),
+                                gap * j.toFloat(),
+                                gap * i.toFloat() + gap,
+                                gap * j.toFloat() + gap,
+                                paint
+                        )
+                    }
+                }
+            }
+        }
+        return bgBitmap
+    }
+
+    /**
+     * 保存图片
+     */
+    fun saveBitmap() {
+        ThreadPool.getInstance().executeFixed(Runnable {
+            for (key in bitmapLruCache.getKeys()) {
+                FileUtils.setDir(measuredTime!!).saveBitmap2SdCard(key, bitmapLruCache.get(key))
+            }
+            Timber.e("保存完毕")
+        })
+    }
+
+    var onLoadSDBitmap: OnLoadSDBitmap? = null
+
+    interface OnLoadSDBitmap {
+        fun onCompleted()
     }
 
     /**
      * bitmap方块的缓存器
      */
-    class BitmapLruCache : LruCache<String, Bitmap> {
+    inner class BitmapLruCache : LruCache<String, Bitmap> {
         constructor(maxSize: Int) : super(maxSize)
 
         private val keys: HashSet<String>
@@ -198,6 +273,13 @@ class BitmapProviderUtils(tileLength: Float, workWidth: Float, mapAccuracy: Floa
         fun add(key: String, bitmap: Bitmap) {
             put(key, bitmap)
             keys.add(key)
+        }
+
+        override fun entryRemoved(evicted: Boolean, key: String?, oldValue: Bitmap?, newValue: Bitmap?) {
+            super.entryRemoved(evicted, key, oldValue, newValue)
+            if (evicted) {
+                FileUtils.setDir(measuredTime!!).saveBitmap2SdCard(key!!, oldValue!!)
+            }
         }
     }
 }

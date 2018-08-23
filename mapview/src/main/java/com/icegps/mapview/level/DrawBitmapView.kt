@@ -45,7 +45,7 @@ class DrawBitmapView : ChildBaseView {
         clear(tiles, bgTiles)
         this.tiles!!.addAll(tiles)
         this.bgTiles!!.addAll(bgTiles)
-        invalidate()
+        postInvalidate()
     }
 
     fun clearTiles() {

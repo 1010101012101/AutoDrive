@@ -62,9 +62,16 @@
         <activity
             android:name=".activity.BleConnectActivity"
             android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.WorkHistoryListActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.WorkHistoryMapActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
         <!--<activity-->
-            <!--android:name=".activity.MapActivity"-->
-            <!--android:screenOrientation="landscape" />-->
+        <!--android:name=".activity.MapActivity"-->
+        <!--android:screenOrientation="landscape" />-->
     </application>
 
 </manifest>

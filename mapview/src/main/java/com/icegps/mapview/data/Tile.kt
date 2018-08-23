@@ -13,6 +13,7 @@ class Tile {
 
     var state = State.UNASSIGNED
 
+    var tileLenght = 0
     /**
      * 第几行
      */
@@ -40,7 +41,7 @@ class Tile {
             }
         }
 
-    constructor(row: Int, column: Int, left: Float, top: Float, right: Float, bottom: Float) {
+    constructor(row: Int, column: Int, left: Float, top: Float, right: Float, bottom: Float, tileLenght: Int) {
         //竖向
         this.row = row
         //横向
@@ -49,12 +50,9 @@ class Tile {
         this.top = top
         this.right = right
         this.bottom = bottom
+        this.tileLenght = tileLenght
     }
 
-    constructor(row: Int, column: Int) {
-        this.row = row
-        this.column = column
-    }
 
     override fun hashCode(): Int {
         return 0

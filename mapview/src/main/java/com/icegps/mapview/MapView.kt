@@ -1,11 +1,12 @@
 package com.icegps.mapview
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import com.icegps.mapview.data.Tile
-import com.icegps.mapview.level.DrawBackgroundLineView
 import com.icegps.mapview.level.DrawBitmapView
 import com.icegps.mapview.level.DrawPathView
 import com.icegps.mapview.level.MarkerLayout
@@ -15,13 +16,11 @@ class MapView : GestureDetectorView {
     private var markerLayout: MarkerLayout
     private var drawBitmapView: DrawBitmapView
     private var drawPathView: DrawPathView
-    private var drawBackgroundLineView: DrawBackgroundLineView
     private var tiles: HashSet<Tile> = HashSet()
     private var bgTiles: HashSet<Tile> = HashSet()
     private var viewport: Rect
     private var stateSnapshot: StateSnapshot? = null
     private var bgStateSnapshot: StateSnapshot? = null
-    private lateinit var bgBitmap: Bitmap
     var bitmapProvider: BitmapProvider? = null
     var tileLength = 200
     var bgTileLength = 400
@@ -35,9 +34,7 @@ class MapView : GestureDetectorView {
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     init {
-        initBgBitmap()
         viewport = Rect()
-        drawBackgroundLineView = DrawBackgroundLineView(context)
         drawBitmapView = DrawBitmapView(context)
         drawPathView = DrawPathView(context)
         markerLayout = MarkerLayout(context)
@@ -45,42 +42,14 @@ class MapView : GestureDetectorView {
         addLevelView()
     }
 
-    /**
-     * 初始化背景图片
-     */
-    fun initBgBitmap() {
-        bgBitmap = Bitmap.createBitmap(tileLength, tileLength, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bgBitmap)
-        canvas.drawColor(Color.parseColor("#59A522"))
-        val paint = Paint()
-        paint.strokeWidth = 20f
-        paint.color = Color.parseColor("#22000000")
-        var count = 8
-        val gap = bgTileLength / count
-        for (i in 0 until count) {
-            for (j in 0 until count) {
-                if ((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
-                    canvas.drawRect(
-                            gap * i.toFloat(),
-                            gap * j.toFloat(),
-                            gap * i.toFloat() + gap,
-                            gap * j.toFloat() + gap,
-                            paint
-                    )
-                }
-            }
-        }
-    }
 
     private fun addLevelView() {
-        addView(drawBackgroundLineView)
         addView(drawBitmapView)
         addView(drawPathView)
         addView(markerLayout)
     }
 
     override fun scaleChange(scale: Float) {
-        drawBackgroundLineView.setScale(scale)
         drawBitmapView.setScale(scale)
         drawPathView.setScale(scale)
         markerLayout.setScale(scale)
@@ -254,7 +223,7 @@ class MapView : GestureDetectorView {
                     var left = column * tileLength.toFloat()
                     var right = left + tileLength.toFloat()
                     if (bitmapProvider != null) {
-                        val tile = Tile(row, column, left, top, right, bottom)
+                        val tile = Tile(row, column, left, top, right, bottom, tileLength)
                         val bitmap = bitmapProvider!!.getBitmap(tile)
                         if (bitmap != null) {
                             tile.bitmap = bitmap
@@ -272,9 +241,14 @@ class MapView : GestureDetectorView {
                     var bottom = top + bgTileLength.toFloat()
                     var left = column * bgTileLength.toFloat()
                     var right = left + bgTileLength.toFloat()
-                    val tile = Tile(row, column, left, top, right, bottom)
-                    tile.bitmap = bgBitmap
-                    bgTiles.add(tile)
+                    if (bitmapProvider != null) {
+                        val tile = Tile(row, column, left, top, right, bottom, bgTileLength)
+                        val bitmap = bitmapProvider!!.getNotAffectedByScaleBitmap(tile)
+                        if (bitmap != null) {
+                            tile.bitmap = bitmap
+                            bgTiles.add(tile)
+                        }
+                    }
                 }
             }
 

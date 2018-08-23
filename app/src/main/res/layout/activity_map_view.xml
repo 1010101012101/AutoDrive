@@ -198,7 +198,6 @@
 
 
             <RelativeLayout
-                android:id="@+id/rrrrr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp">
@@ -236,7 +235,7 @@
             android:text="信号" />
 
         <TextView
-            android:id="@+id/tv_work"
+            android:id="@+id/tv_work_history"
             style="@style/MainOptionTvStyle"
             android:layout_marginTop="5dp"
             android:drawableTop="@mipmap/history"

@@ -1,5 +1,6 @@
 package com.icegps.autodrive.activity
 
+import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
@@ -19,6 +20,7 @@ import com.icegps.autodrive.ble.DataManager
 import com.icegps.autodrive.ble.ParseDataManager
 import com.icegps.autodrive.ble.data.Cmds
 import com.icegps.autodrive.ble.data.ParseDataBean
+import com.icegps.autodrive.constant.Cons
 import com.icegps.autodrive.data.WorkWidth
 import com.icegps.autodrive.gen.GreenDaoUtils
 import com.icegps.autodrive.map.MapUtils
@@ -30,6 +32,7 @@ import com.icegps.jblelib.ble.BleHelper
 import com.icegps.jblelib.ble.data.LocationStatus
 import com.icegps.mapview.GestureDetectorView
 import com.icegps.serialportlib.serialport.SerialPortHelper
+import com.tbruyelle.rxpermissions.RxPermissions
 import kotlinx.android.synthetic.main.activity_map_view.*
 import kotlinx.android.synthetic.main.dialog_new_work.view.*
 import kotlinx.android.synthetic.main.pop_work_mode.view.*
@@ -44,24 +47,46 @@ class MapActivity : BaseActivity() {
     private var popWorkModeView: View? = null
     private var workModeAdapter: WorkModeAdapter? = null
     private var popupWindow: PopupWindow? = null
-    private var width = 3f
     private lateinit var mapUtils: MapUtils
     private var workWidths: List<WorkWidth>? = null
-
+    private var measuredTime: Long? = null
     override fun layout(): Int {
         return R.layout.activity_map_view
     }
 
     override fun init() {
-        ParseDataManager.addDataCallback(dataCallBackImpl)
         testData = TestData()
         mapUtils = MapUtils(map_view, activity, testData!!)
-        setRulerValue(map_view.scale)
         testData()
-        setIvABEnab(false)
+        initUi()
         initBleCmd()
+        initSetOffsetPopupWindow()
+        requestPermissions()
 
 
+    }
+
+    /**
+     * 权限请求
+     */
+    private fun requestPermissions() {
+        RxPermissions(this).request(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+                .subscribe({
+                    if (!it) {
+                        AlertDialog.Builder(activity)
+                                .setMessage("禁用读写权限将无法保存作业历史!")
+                                .setPositiveButton("确定", null)
+                                .show()
+                    }
+
+                })
+    }
+
+    /**
+     * 设置偏移的pop
+     */
+    fun initSetOffsetPopupWindow() {
         workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
         workModeContentView = View.inflate(this, R.layout.dialog_new_work, null)
         popWorkModeView = View.inflate(this, R.layout.pop_work_mode, null)
@@ -79,13 +104,18 @@ class MapActivity : BaseActivity() {
         popupWindow!!.isOutsideTouchable = true
         popupWindow!!.setBackgroundDrawable(ColorDrawable())
         popupWindow!!.contentView = popWorkModeView
-
     }
 
+    /**
+     * 设置比例尺的值
+     */
     fun setRulerValue(scale: Float) {
-        tv_ruler.setText(Math.round(mapUtils.mapAccuracy / scale * 200f).toString() + "M")
+        tv_ruler.setText(Math.round(Cons.mapAccuracy / scale * 200f).toString() + "M")
     }
 
+    /**
+     * 首次进入发送命令
+     */
     private fun initBleCmd() {
         DataManager.writeCmd(Cmds.CONNECT)
         DataManager.writeCmd(Cmds.GETSENSORV, "0", "0")
@@ -94,14 +124,21 @@ class MapActivity : BaseActivity() {
         DataManager.writeCmd(Cmds.GETWORKV, "1", "500")
     }
 
+    /**
+     * 测试数据
+     */
     private fun testData() {
         testData!!.getTestData {
             mapUtils.run(locationStatus = it)
         }
     }
 
+    /**
+     * 设置监听
+     */
     override fun setListener() {
         mapUtils.mapStateCallback = mapStateCallback
+        ParseDataManager.addDataCallback(dataCallBackImpl)
         iv_wheel.setOnClickListener {
             DataManager.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
         }
@@ -109,7 +146,7 @@ class MapActivity : BaseActivity() {
 
         tv_setting.setOnClickListener { startActivity(Intent(activity, SystemSettingActivity::class.java)) }
 
-        tv_work.setOnClickListener {}
+        tv_work_history.setOnClickListener { startActivity(Intent(activity, WorkHistoryListActivity::class.java)) }
 
         tv_start_or_stop_work.setOnClickListener {
             when (tv_start_or_stop_work.isSelected) {
@@ -118,7 +155,7 @@ class MapActivity : BaseActivity() {
                 }
                 true -> {
                     ll_ab_point.visibility = View.VISIBLE
-                    mapUtils.stopWork()
+                    mapUtils.stopWork(measuredTime!!)
                     setIvABEnab(false)
                     tv_start_or_stop_work.isSelected = false
                     tv_start_or_stop_work.setText(getString(R.string.new_work))
@@ -137,7 +174,7 @@ class MapActivity : BaseActivity() {
             dialog!!.dismiss()
         }
         workModeContentView!!.tv_confirm.setOnClickListener {
-            if (width == 0f) {
+            if (Cons.workWidth == 0f) {
                 Init.showToast("当前作业宽度为0,请先进入设置界面设置作业宽度")
                 dialog!!.dismiss()
                 return@setOnClickListener
@@ -145,8 +182,8 @@ class MapActivity : BaseActivity() {
             dialog!!.dismiss()
             ll_ab_point.visibility = View.VISIBLE
             setIvABEnab(true)
-            mapUtils.workWidth = width
-            mapUtils.startWork()
+            measuredTime = System.currentTimeMillis()
+            mapUtils.startWork(measuredTime!!)
             tv_start_or_stop_work.isSelected = true
             tv_start_or_stop_work.setText(getString(R.string.stop))
             setTvHintStr(getString(R.string.please_set_a))
@@ -156,7 +193,7 @@ class MapActivity : BaseActivity() {
             workModeContentView!!.tv_sel_work_mode.setText(workWidths!!.get(position).workName)
             workModeContentView!!.tv_width.setText(workWidths!!.get(position).workWidth.toString())
             popupWindow!!.dismiss()
-            width = workWidths!!.get(position).workWidth
+            Cons.workWidth = workWidths!!.get(position).workWidth
             selMode = position
         }
 
@@ -208,19 +245,14 @@ class MapActivity : BaseActivity() {
             map_view.dragTo(0, 0)
             return@setOnLongClickListener true
         }
-
-
-        rrrrr.setOnClickListener {
-            map_view.setRotate(60f, 0f, 0f)
-        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
-        workModeAdapter!!.notifyDataSetChanged()
-        workModeContentView?.tv_width?.setText(workWidths!!.get(selMode)!!.workWidth.toString())
-        map_view.addListener(mapListenerImpl)
+    /**
+     * 初始化ui
+     */
+    fun initUi() {
+        setRulerValue(map_view.scale)
+        setIvABEnab(false)
     }
 
 
@@ -250,7 +282,9 @@ class MapActivity : BaseActivity() {
         }
     }
 
-
+    /**
+     * 设置提示
+     */
     private fun setTvHintStr(hint: String) {
         tv_hint.setText(hint)
     }
@@ -277,6 +311,14 @@ class MapActivity : BaseActivity() {
         SerialPortHelper.closeSerialPort()
         if (testData != null)
             testData!!.startOrStop(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        workWidths = GreenDaoUtils.daoSession.workWidthDao.loadAll()
+        workModeAdapter!!.notifyDataSetChanged()
+        workModeContentView?.tv_width?.setText(workWidths!!.get(selMode)!!.workWidth.toString())
+        map_view.addListener(mapListenerImpl)
     }
 
     override fun onPause() {
@@ -314,7 +356,6 @@ class MapActivity : BaseActivity() {
                 tv_offset.setText(offset.toInt().toString())
                 setOffsetIv(offset)
             }
-
         }
 
         override fun onLocationData(locationStatus: LocationStatus?) {
@@ -355,10 +396,11 @@ class MapActivity : BaseActivity() {
             }
             mapUtils.run(locationStatus)
         }
-
     }
 
-
+    /**
+     * 根据偏移值来设置偏移的图片
+     */
     private fun setOffsetIv(offset: Float) {
         iv_left_offset_green.visibility = if (offset < 0 && offset >= -2) View.VISIBLE else View.INVISIBLE
         iv_left_offset_yellow.visibility = if (offset < -2 && offset >= -4) View.VISIBLE else View.INVISIBLE
@@ -367,6 +409,18 @@ class MapActivity : BaseActivity() {
         iv_right_offset_green.visibility = if (offset > 0 && offset <= 2) View.VISIBLE else View.INVISIBLE
         iv_right_offset_yellow.visibility = if (offset > 2 && offset <= 4) View.VISIBLE else View.INVISIBLE
         iv_right_offset_red.visibility = if (offset > 4) View.VISIBLE else View.INVISIBLE
+    }
+
+
+    override fun onBackPressed() {
+        val alert = AlertDialog.Builder(activity)
+        alert.setMessage("退出应用?")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        finish()
+                    }
+                }).show()
     }
 
     private var oldScale = 0f
