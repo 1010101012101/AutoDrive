@@ -62,8 +62,6 @@ class MapActivity : BaseActivity() {
         initBleCmd()
         initSetOffsetPopupWindow()
         requestPermissions()
-
-
     }
 
     /**
@@ -128,9 +126,9 @@ class MapActivity : BaseActivity() {
      * 测试数据
      */
     private fun testData() {
-        testData!!.getTestData {
-            mapUtils.run(locationStatus = it)
-        }
+//        testData!!.getTestData {
+//            mapUtils.run(locationStatus = it)
+//        }
     }
 
     /**
@@ -138,7 +136,11 @@ class MapActivity : BaseActivity() {
      */
     override fun setListener() {
         mapUtils.mapStateCallback = mapStateCallback
+
         ParseDataManager.addDataCallback(dataCallBackImpl)
+
+        tv_measure.setOnClickListener { startActivity(Intent(activity, MeasureMapActivity::class.java))  }
+
         iv_wheel.setOnClickListener {
             DataManager.writeCmd(Cmds.AUTO, if (autoOrManual == 1) "0" else "1")
         }
@@ -245,6 +247,7 @@ class MapActivity : BaseActivity() {
             map_view.dragTo(0, 0)
             return@setOnLongClickListener true
         }
+
     }
 
     /**

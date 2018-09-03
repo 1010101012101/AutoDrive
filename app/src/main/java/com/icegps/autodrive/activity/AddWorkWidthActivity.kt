@@ -2,7 +2,7 @@ package com.icegps.autodrive.activity
 
 import android.view.View
 import android.widget.EditText
-import com.icegps.autodrive.ListenerImpl.TextWatcherImpl
+import com.icegps.autodrive.listenerImpl.TextWatcherImpl
 import com.icegps.autodrive.R
 import com.icegps.autodrive.data.WorkWidth
 import com.icegps.autodrive.gen.GreenDaoUtils

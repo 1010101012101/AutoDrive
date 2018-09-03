@@ -25,8 +25,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.MapActivity"
+            android:name=".activity.SplashActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,7 +44,6 @@
         <activity
             android:name=".activity.InsCalibrationActivity"
             android:screenOrientation="landscape" />
-
         <activity
             android:name=".activity.SatelliteSignalActivity"
             android:screenOrientation="landscape" />
@@ -66,12 +66,16 @@
             android:name=".activity.WorkHistoryListActivity"
             android:screenOrientation="landscape" />
         <activity
+            android:name=".activity.MeasureMapActivity"
+            android:screenOrientation="landscape" />
+        <activity
             android:name=".activity.WorkHistoryMapActivity"
             android:launchMode="singleTask"
             android:screenOrientation="landscape" />
-        <!--<activity-->
-        <!--android:name=".activity.MapActivity"-->
-        <!--android:screenOrientation="landscape" />-->
+        <activity
+            android:name=".activity.MapActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

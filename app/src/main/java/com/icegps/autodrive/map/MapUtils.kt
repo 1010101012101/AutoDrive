@@ -21,6 +21,7 @@ import com.icegps.jblelib.ble.data.LocationStatus
 import com.icegps.mapview.GestureDetectorView
 import com.icegps.mapview.MapView
 import com.icegps.mapview.utils.ScaleHelper
+import java.util.*
 
 class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var mapview: MapView
@@ -39,7 +40,14 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var centerShadowPaint: Paint? = null
     private var centerShadowPath: Path
     private var scale = 1.0f
-
+    /**
+     * 偏移线 -> 正向
+     */
+    private var forwardOffsetLine: TreeMap<Int, Float>
+    /**
+     * 偏移线 -> 负向
+     */
+    private var reverseOffsetLine: TreeMap<Int, Float>
     /**
      * 发送给设备的A点与B点的经纬度
      */
@@ -69,6 +77,8 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
         this.mapview = mapview
         this.activity = activity
         this.testData = testData
+        forwardOffsetLine = TreeMap()
+        reverseOffsetLine = TreeMap()
         scale = mapview.scale
         datumLine = DoubleArray(4)
         line = FloatArray(4)
@@ -138,7 +148,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             mapview.requestRender()
             //当前拖动值+上拖拉机移动的值
             mapview.dragBy(x, y)
-            //刷新工作区域
+            //刷新工作区域x
             refreshWorkArea()
         })
     }
@@ -329,7 +339,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             //平移线条
             val offsetLine = MathUtils.offsetLine(datumLine, workWidthPixel * i)
             //左右单边延长的长度
-            val max = Math.min(mapview.height, mapview.width) / 2
+            val max = Math.max(mapview.height, mapview.width) / 2
             //延长线条
             var lengthenLine = MathUtils.lengthenLine(offsetLine, ScaleHelper.unscale(max.toDouble(), scale))
             //移动线条
@@ -338,6 +348,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             val linePath = MathUtils.doubleArray2Path(moveLengthenLine)
 
             mapview.drawPath(linePath, if (i == centerLinePosition) centerLinePaint else null)
+
             //添加阴影部分
             if (i == centerLinePosition) {
                 centerShadowPath.reset()
@@ -353,24 +364,44 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
         }
     }
 
+    /**
+     * 设置A-B基准线的偏移量
+     */
     fun setOffset(offset: Float) {
         datumLine = MathUtils.offsetLine(datumLine, offset)
         mapview.moveMarker(datumLine[0], datumLine[1], ivMarkerA!!)
         mapview.moveMarker(datumLine[2], datumLine[3], ivMarkerB!!)
         setWorkArea(centerLinePosition, moveLine, scale)
+        if (centerLinePosition<0){
+            reverseOffsetLine.put(centerLinePosition, offset)
+
+        }else if (centerLinePosition>0){
+            forwardOffsetLine.put(centerLinePosition, offset)
+        }else{
+
+        }
     }
 
+    /**
+     * 添加标记
+     */
     private fun addMarker(x: Double, y: Double, view: View) {
         mapview.addMarker(x, y, view)
         tractors!!.bringToFront()
     }
 
+    /**
+     * 创建作为标记的Imageview
+     */
     private fun createMarkerIv(res: Int): View {
         var resIv = ImageView(activity)
         resIv.setImageResource(res)
         return resIv
     }
 
+    /**
+     * 停止工作
+     */
     fun stopWork(measuredTime: Long) {
         isStartWork = false
         bitmapProviderUtils.saveBitmap()
@@ -378,6 +409,9 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
         GreenDaoUtils.daoSession.workHistoryDao.insertOrReplace(workHistory)
     }
 
+    /**
+     * 开始工作
+     */
     fun startWork(measuredTime: Long) {
         isStartWork = true
         isMarkerA = false

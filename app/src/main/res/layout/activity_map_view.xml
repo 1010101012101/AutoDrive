@@ -278,15 +278,15 @@
 
 
         <TextView
-            android:id="@+id/tv_view_change"
+            android:id="@+id/tv_measure"
             style="@style/MainOptionTvStyle"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="5dp"
-            android:drawableTop="@mipmap/view_change"
+            android:drawableTop="@mipmap/measure"
             android:gravity="center"
-            android:text="视图"
-            android:visibility="invisible" />
+            android:text="测量"
+            android:visibility="visible" />
 
 
         <TextView

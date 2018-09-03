@@ -5,6 +5,7 @@ import java.util.*
 
 class MathUtils {
     companion object {
+        var EARTH_RADIUS = 6378137.0
         /**
          * 计算两点角度
          */
@@ -114,6 +115,43 @@ class MathUtils {
 
             return line
         }
+
+        fun rad(d: Double): Double {
+            return d * Math.PI / 180.0
+        }
+
+        //单位:米
+        fun calculateDistance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+            val radLat1 = rad(lat1)
+            val radLat2 = rad(lat2)
+            val a = radLat1 - radLat2
+            val b = rad(lng1) - rad(lng2)
+            var s = 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2.0), 2.0) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2.0), 2.0)))
+            s *= EARTH_RADIUS
+            return s
+        }
+
+
+        //单位:平米
+        fun calcArea(lat0: Double, lng0: Double, lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+            val radlng0 = rad(lng0)
+            val radlng1 = rad(lng1)
+            val radlng2 = rad(lng2)
+            val avrageradlat0 = averagerad(lat0, lat1)
+            val lng10 = (radlng1 - radlng0) *Math. cos(avrageradlat0)
+            val lng20 = (radlng2 - radlng0) * Math.cos(avrageradlat0)
+            return RRPI(lng10 * (lat2 - lat0) - lng20 * (lat1 - lat0))
+        }
+
+        fun averagerad(x0: Double, x1: Double): Double {
+            return (x0 + x1) * Math.PI / 180.0 / 2.0 //两点平均弧度
+        }
+
+        //返回单位:米
+        fun RRPI(x: Double): Double {
+            return x * Math.PI * EARTH_RADIUS * EARTH_RADIUS / 360.0 //(pi * R * R)/360
+        }
+
     }
 
 }

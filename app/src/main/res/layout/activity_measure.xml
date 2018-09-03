@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.icegps.mapview.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <RadioButton
+            android:id="@+id/rb_area"
+            style="@style/MeasureRbStyle"
+            android:layout_margin="3dp"
+            android:layout_marginTop="5dp"
+            android:button="@null"
+            android:checked="true"
+            android:drawableTop="@drawable/sel_rb_area"
+            android:gravity="center"
+            android:text="面积" />
+
+        <RadioButton
+            android:id="@+id/rb_lenght"
+            style="@style/MeasureRbStyle"
+            android:layout_margin="3dp"
+            android:layout_marginTop="5dp"
+            android:button="@null"
+            android:drawableTop="@drawable/sel_rb_lenght"
+            android:gravity="center"
+            android:text="长度" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:clickable="true"
+            style="@style/MainOptionTvStyle"
+            android:layout_margin="3dp"
+            android:layout_marginTop="5dp"
+            android:drawableTop="@mipmap/start"
+            android:gravity="center"
+            android:text="开始" />
+
+        <TextView
+            android:clickable="true"
+            style="@style/MainOptionTvStyle"
+            android:layout_margin="3dp"
+            android:layout_marginTop="5dp"
+            android:drawableTop="@mipmap/stop"
+            android:gravity="center"
+            android:text="结束" />
+
+    </LinearLayout>
+</RelativeLayout>
