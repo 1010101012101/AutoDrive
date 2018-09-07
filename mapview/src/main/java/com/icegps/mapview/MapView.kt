@@ -55,12 +55,6 @@ class MapView : GestureDetectorView {
         markerLayout.setScale(scale)
     }
 
-    fun setRotate(rotate: Float, x: Float, y: Float) {
-        drawBitmapView.rotation = rotate
-        drawBitmapView.rotation = rotate
-        drawPathView.rotation = rotate
-        markerLayout.rotation = rotate
-    }
 
     /**
      * 添加一个标记 以view的形式

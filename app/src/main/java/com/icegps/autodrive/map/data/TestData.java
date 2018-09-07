@@ -71,8 +71,8 @@ public class TestData {
 
                             enu = LatLonUtils.ecef2enu(bPos, vECEF);
 
-                            double x = (enu[0] * 2);
-                            double y = -(enu[1] * 2);
+                            double x = (enu[0] * 10);
+                            double y = -(enu[1] * 10);
                             float dispersion = (float) enu[2];
                             if (dispersion == 0) dispersion = 0.001f;
                             LocationStatus locationStatus = new LocationStatus();

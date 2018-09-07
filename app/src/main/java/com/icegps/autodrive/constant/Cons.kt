@@ -9,7 +9,7 @@ class Cons{
 
         var workWidth = 3F
         var mapAccuracy = 0.1f
-        var workWidthPixel = 0f
+        var workWidthPixel =0f
             get() {
                 field = workWidth / mapAccuracy
                 return field

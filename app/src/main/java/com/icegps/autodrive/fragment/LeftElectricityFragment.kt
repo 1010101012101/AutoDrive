@@ -6,9 +6,9 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.CompoundButton
 import com.icegps.autodrive.R
-import com.icegps.autodrive.ble.data.ParseDataBean
-import com.icegps.autodrive.ble.data.Cmds
 import com.icegps.autodrive.ble.ParseDataManager
+import com.icegps.autodrive.ble.data.Cmds
+import com.icegps.autodrive.ble.data.ParseDataBean
 import kotlinx.android.synthetic.main.fragment_left_electricity.*
 import kotlinx.android.synthetic.main.fragment_left_electricity.view.*
 import java.lang.Float.parseFloat
@@ -76,7 +76,9 @@ class LeftElectricityFragment : BaseFragment() {
         var target = et_target.text.toString()
         if (TextUtils.isEmpty(target)) target = "0"
         isTest = true
+
         sendTest(switch, "1" + "," + target)
+
         differenceValueCalculate()
     }
 

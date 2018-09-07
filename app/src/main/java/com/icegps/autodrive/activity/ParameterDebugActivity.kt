@@ -15,7 +15,7 @@ class ParameterDebugActivity : BaseActivity() {
     lateinit var fragments: ArrayList<Fragment>
 
     override fun layout(): Int {
-       return R.layout.activity_parameter_debug
+        return R.layout.activity_parameter_debug
     }
 
     override fun init() {
@@ -25,9 +25,10 @@ class ParameterDebugActivity : BaseActivity() {
         fragments.add(AzimuthFragment())
         fragments.add(CourseFragment())
         fragments.add(DistanceFragment())
+        fragments.add(SpeedFragment())
         tv_title.setText("参数校准")
         viewPager.adapter = fragmentPagerAdapter
-        DataManager.writeCmd(Cmds.GETCONTROLV , "1" ,"200")
+        DataManager.writeCmd(Cmds.GETCONTROLV, "1", "200")
 
     }
 
@@ -42,7 +43,7 @@ class ParameterDebugActivity : BaseActivity() {
             }
 
             override fun onPageSelected(position: Int) {
-                DataManager.writeCmd(Cmds.SETWORKS ,"0")
+                DataManager.writeCmd(Cmds.SETWORKS, "0")
                 when (position) {
                     0 -> {
                         rb1.isChecked = true
@@ -58,6 +59,9 @@ class ParameterDebugActivity : BaseActivity() {
                     }
                     4 -> {
                         rb5.isChecked = true
+                    }
+                    5 -> {
+                        rb6.isChecked = true
                     }
                 }
             }
@@ -80,6 +84,9 @@ class ParameterDebugActivity : BaseActivity() {
                 rb5.id -> {
                     viewPager.setCurrentItem(4)
                 }
+                rb6.id -> {
+                    viewPager.setCurrentItem(5)
+                }
             }
 
         })
@@ -88,8 +95,8 @@ class ParameterDebugActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        DataManager.writeCmd(Cmds.GETCONTROLV , "0" , "0")
-        DataManager.writeCmd(Cmds.SETWORKS ,"0")
+        DataManager.writeCmd(Cmds.GETCONTROLV, "0", "0")
+        DataManager.writeCmd(Cmds.SETWORKS, "0")
     }
 
 

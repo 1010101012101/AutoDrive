@@ -33,7 +33,7 @@ class MathUtils {
 
             s = Math.sqrt(s * (s - a) * (s - b) * (s - c))
 
-            var h = s / (1.0f / 2.0f * c)
+            var h = s / (1.0 / 2.0 * c)
 
             return h
         }

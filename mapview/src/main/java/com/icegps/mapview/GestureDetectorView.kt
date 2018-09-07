@@ -52,7 +52,9 @@ abstract class GestureDetectorView : ViewGroup {
      */
     var scale = 8f
 
+    @Volatile
     var tx = 0
+    @Volatile
     var ty = 0
     /**
      * 设置的宽高
@@ -191,7 +193,7 @@ abstract class GestureDetectorView : ViewGroup {
         scale = checkScale(scale)
         if (this.scale != scale) {
             this.scale = scale
-            invalidate()
+//            invalidate()
         }
     }
 
@@ -235,7 +237,6 @@ abstract class GestureDetectorView : ViewGroup {
 
         var scaleScrollY = getOffsetScrollYFromScale(y, scale, this.scale)
 
-
         tx += scaleScrollX
 
         ty += scaleScrollY
@@ -251,13 +252,13 @@ abstract class GestureDetectorView : ViewGroup {
     }
 
     private fun getOffsetScrollXFromScale(focusX: Int, destinationScale: Float, currentScale: Float): Int {
-        val currentPoint = ScaleHelper.scale(scrollX + focusX.toDouble(), destinationScale / currentScale) - (scrollX + focusX)
-        return currentPoint
+        val currentPoint = (tx + focusX.toDouble()) * destinationScale / currentScale - (tx + focusX)
+        return currentPoint.toInt()
     }
 
     private fun getOffsetScrollYFromScale(focusY: Int, destinationScale: Float, currentScale: Float): Int {
-        val currentPoint = ScaleHelper.scale(scrollY + focusY.toDouble(), destinationScale / currentScale) - (scrollY + focusY)
-        return currentPoint
+        val currentPoint = (ty + focusY.toDouble()) * destinationScale / currentScale - (ty + focusY)
+        return currentPoint.toInt()
     }
 
     /**
@@ -441,9 +442,6 @@ abstract class GestureDetectorView : ViewGroup {
         }
     }
 
-    override fun scrollTo(x: Int, y: Int) {
-        super.scrollTo(x, y)
-    }
 
     /**
      * 拖动到指定位置 (动画)
@@ -460,14 +458,22 @@ abstract class GestureDetectorView : ViewGroup {
         onDragBegin()
     }
 
-    private var oldDragByX = 0
-    private var oldDragByY = 0
+    private var oldDragByX = 0.0
+    private var oldDragByY = 0.0
+
     fun dragBy(x: Double, y: Double) {
-        var x = (x * scale).toInt()
-        var y = (y * scale).toInt()
-        tx += x - oldDragByX
-        ty += y - oldDragByY
+
+        var x = (x * scale)
+        var y = (y * scale)
+
+        var xx = (x - (oldDragByX))
+        var yy = (y - (oldDragByY))
+
+        tx += (xx).toInt()
+        ty += (yy).toInt()
+
         scrollTo(tx, ty)
+
         oldDragByX = x
         oldDragByY = y
     }
@@ -480,11 +486,11 @@ abstract class GestureDetectorView : ViewGroup {
      */
     fun dragImmediately(x: Int, y: Int) {
         onDragBegin()
-        var x = x - width / 2 + scaleWidth / 2
-        var y = y - height / 2 + scaleHeight / 2
-        scrollTo(x, y)
-        tx = x
-        ty = y
+        var x = x*scale - width / 2 + scaleWidth / 2
+        var y = y*scale - height / 2 + scaleHeight / 2
+        scrollTo(x.toInt(), y.toInt())
+        tx = x.toInt()
+        ty = y.toInt()
         onDragEnd()
         invalidate()
     }
@@ -565,6 +571,7 @@ abstract class GestureDetectorView : ViewGroup {
 
 
     open class ListenerImpl : Listener {
+
         override fun onScaleBegin(scale: Float) {
         }
 

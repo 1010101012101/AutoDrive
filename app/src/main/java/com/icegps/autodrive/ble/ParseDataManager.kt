@@ -37,7 +37,6 @@ import java.util.concurrent.CopyOnWriteArrayList
         })
 
         hex.setOnHexCallback(object : ParseHex.OnHexCallback {
-
             override fun onHex(bytes: ByteArray?) {
                 for (dataCallback in dataCallbacks) {
                     dataCallback.onHex(bytes)

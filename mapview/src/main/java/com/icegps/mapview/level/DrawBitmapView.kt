@@ -24,7 +24,7 @@ class DrawBitmapView : ChildBaseView {
      */
     override fun setScale(scale: Float) {
         this.scale = scale
-        requestLayout()
+        invalidate()
     }
 
     @SuppressLint("DrawAllocation")

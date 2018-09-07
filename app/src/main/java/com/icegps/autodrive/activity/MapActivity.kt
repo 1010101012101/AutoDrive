@@ -126,9 +126,9 @@ class MapActivity : BaseActivity() {
      * 测试数据
      */
     private fun testData() {
-//        testData!!.getTestData {
-//            mapUtils.run(locationStatus = it)
-//        }
+        testData!!.getTestData {
+            mapUtils.run(locationStatus = it)
+        }
     }
 
     /**
@@ -353,7 +353,6 @@ class MapActivity : BaseActivity() {
             if (autoOrManual == 1) {
                 mapUtils.sendAb2Blue()
             }
-
             val offset = parseDataBean.workStatus.distanceOffset
             if (offset != null) {
                 tv_offset.setText(offset.toInt().toString())

@@ -44,7 +44,7 @@ class DrawPathView : ChildBaseView {
 
     fun addPath(mapPath: MapPath): MapPath {
         mapPaths.add(mapPath)
-        postInvalidate()
+        invalidate()
         return mapPath
     }
 

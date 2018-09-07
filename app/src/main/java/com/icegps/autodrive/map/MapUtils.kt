@@ -17,6 +17,7 @@ import com.icegps.autodrive.map.data.TestData
 import com.icegps.autodrive.map.utils.BitmapProviderUtils
 import com.icegps.autodrive.map.utils.MathUtils
 import com.icegps.autodrive.map.utils.ThreadPool
+import com.icegps.autodrive.utils.Init
 import com.icegps.jblelib.ble.data.LocationStatus
 import com.icegps.mapview.GestureDetectorView
 import com.icegps.mapview.MapView
@@ -24,6 +25,7 @@ import com.icegps.mapview.utils.ScaleHelper
 import java.util.*
 
 class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
+
     private var mapview: MapView
     private var activity: Activity
     private var tractors: View? = null
@@ -32,10 +34,18 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     private var bitmapProviderUtils: BitmapProviderUtils
     private var datumLine: DoubleArray
     private var line: FloatArray
+
     private var isMarkerB = false
     private var isMarkerA = false
+    /**
+     * 当前车位位置位于第几条线附近(通过AB线计算得出)
+     */
     private var centerLinePosition = 0
-    private var moveLine = 0.0
+    /**
+     * 工作区域的线始终需要将车包裹在内 因此通过偏移量来设置
+     */
+    private var workLineEndsOffset = 0.0
+
     private var centerLinePaint: Paint? = null
     private var centerShadowPaint: Paint? = null
     private var centerShadowPath: Path
@@ -43,11 +53,11 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     /**
      * 偏移线 -> 正向
      */
-    private var forwardOffsetLine: TreeMap<Int, Float>
+    private var forwardOffsetLines: TreeMap<Int, Float>
     /**
-     * 偏移线 -> 负向
+     * 偏移线 <- 负向
      */
-    private var reverseOffsetLine: TreeMap<Int, Float>
+    private var reverseOffsetLines: TreeMap<Int, Float>
     /**
      * 发送给设备的A点与B点的经纬度
      */
@@ -77,8 +87,8 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
         this.mapview = mapview
         this.activity = activity
         this.testData = testData
-        forwardOffsetLine = TreeMap()
-        reverseOffsetLine = TreeMap()
+        forwardOffsetLines = TreeMap()
+        reverseOffsetLines = TreeMap()
         scale = mapview.scale
         datumLine = DoubleArray(4)
         line = FloatArray(4)
@@ -99,7 +109,9 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
                 this@MapUtils.scale = scale
                 if (isMarkerB)
                     threadPool.executeFixed(Runnable {
-                        setWorkArea(centerLinePosition, moveLine, scale)
+                        Init.post(Runnable {
+                            drawWorkLine()
+                        })
                     })
             }
         })
@@ -141,13 +153,13 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
                 tractors.rotation = calculateAzimuth.toFloat()
             }
             //移动拖拉机
-            mapview.moveMarker(x, y, tractors)
+            mapview.moveMarker(x.toInt().toDouble(), y.toInt().toDouble(), tractors)
             //请求mapview重新获取当前屏幕的方块
             mapview.requestGetTile()
             //请求bitmaplayout重绘
             mapview.requestRender()
             //当前拖动值+上拖拉机移动的值
-            mapview.dragBy(x, y)
+            mapview.dragImmediately(x.toInt(), y.toInt())
             //刷新工作区域x
             refreshWorkArea()
         })
@@ -155,7 +167,7 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
 
     fun createMarker() {
-        tractors = createMarkerIv(R.mipmap.tractors)
+        tractors = createMarkerIv(R.drawable.tractors)
         ivMarkerA = createMarkerIv(R.mipmap.a_point)
         ivMarkerB = createMarkerIv(R.mipmap.b_point)
         addMarker(0.0, 0.0, tractors!!)
@@ -192,17 +204,11 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             bLat = currentLat
             bLon = currentLon
             sendAb2Blue()
-            drawWorkArea()
+            drawWorkLine()
             isMarkerB = true
         }
     }
 
-    /**
-     * 绘制工作区域的线段
-     */
-    fun drawWorkArea() {
-        setWorkArea(centerLinePosition, 0.0, mapview.scale)
-    }
 
     var aa = false
     /**
@@ -223,9 +229,9 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
         if (isMarkerB) {
             //abc组成三角形 ab为底边  三角地形的高度
             var triangleHeight = MathUtils.calculateTriangleHeight(AC, BC, AB)
-            //当前位于第几根线
+            //当前位于第几根线 TODO
             var centerLinePosition = Math.round(triangleHeight / Cons.workWidthPixel).toInt()
-            //正向直线
+            //正向直线你
             val right = MathUtils.offsetLine(datumLine, centerLinePosition * Cons.workWidthPixel)
             //负向直线
             val left = MathUtils.offsetLine(datumLine, -centerLinePosition * Cons.workWidthPixel)
@@ -239,37 +245,36 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             }
             //以当前线位置为中心,左右各画两条线
             if (this.centerLinePosition != centerLinePosition) {
-                setWorkArea(centerLinePosition, 0.0, scale)
                 this.centerLinePosition = centerLinePosition
+                drawWorkLine()
             }
 
             //始终保持车在线的中心
-            var lenghten = 0.0
+            var moveLine = 0.0
             if (AC > BC) {
                 //在一条直线  A与车
                 if (AC - BC == AB) {
-                    lenghten = AC - AB / 2
+                    moveLine = AC - AB / 2
                 } else {
                     var cosa = (Math.pow(AB, 2.0) + Math.pow(AC, 2.0) - Math.pow(BC, 2.0)) / (2 * AB * AC)
-                    lenghten = AC * cosa - AB / 2
+                    moveLine = AC * cosa - AB / 2
                 }
                 aa = true
 
             } else if (BC > AC) {
                 //AB线与车在一条直线B与车
                 if (BC - AC == AB) {
-                    lenghten = BC - AB / 2
+                    moveLine = BC - AB / 2
                 } else {
                     var cosa = (Math.pow(AB, 2.0) + Math.pow(BC, 2.0) - Math.pow(AC, 2.0)) / (2 * AB * BC)
-                    lenghten = -(BC * cosa - AB / 2)
+                    moveLine = -(BC * cosa - AB / 2)
                 }
                 aa = false
-
             }
 
-            if (Math.abs(lenghten - this.moveLine) > ScaleHelper.unscale(50.0, scale)) {
-                setWorkArea(centerLinePosition, lenghten, scale)
-                this.moveLine = lenghten
+            if (Math.abs(moveLine - this.workLineEndsOffset) > ScaleHelper.unscale(50.0, scale)) {
+                this.workLineEndsOffset = moveLine
+                drawWorkLine()
             }
 
             refreshAb(centerLinePosition)
@@ -280,7 +285,8 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
      * 刷新AB经纬度  AB点应该是距离本车最近的线条
      */
     private fun refreshAb(centerLinePosition: Int) {
-        val offsetLine = MathUtils.offsetLine(datumLine, centerLinePosition * workWidthPixel)
+        var offset = getOffset(centerLinePosition)
+        val offsetLine = MathUtils.offsetLine(datumLine, centerLinePosition * workWidthPixel + offset)
         //将A点XY坐标点转换为经纬度
         val latLon1 = testData.xy2LatLon(offsetLine[0], offsetLine[1])
         //将B点XY坐标点转换为经纬度
@@ -309,8 +315,6 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
             bLat = latLon1[0]
             bLon = latLon1[1]
         }
-
-
     }
 
     /**
@@ -330,30 +334,35 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
 
     /**
      * 绘制五条表示工作区域的直线
-     * @param centerLinePosition 中心线的位置
-     * @param moveLine 线需要移动多少
      */
-    private fun setWorkArea(centerLinePosition: Int, moveLine: Double, scale: Float) {
+    private fun drawWorkLine() {
         mapview.clearPath()
         for (i in centerLinePosition - halfOfTheLine..centerLinePosition + halfOfTheLine) {
             //平移线条
-            val offsetLine = MathUtils.offsetLine(datumLine, workWidthPixel * i)
+            var lines = MathUtils.offsetLine(datumLine, workWidthPixel * i)
             //左右单边延长的长度
-            val max = Math.max(mapview.height, mapview.width) / 2
-            //延长线条
-            var lengthenLine = MathUtils.lengthenLine(offsetLine, ScaleHelper.unscale(max.toDouble(), scale))
-            //移动线条
-            var moveLengthenLine = MathUtils.moveLine(lengthenLine, moveLine)
+            val max = Math.min(mapview.height, mapview.width) / 4 * 3
 
-            val linePath = MathUtils.doubleArray2Path(moveLengthenLine)
+            //延长线条
+            lines = MathUtils.lengthenLine(lines, ScaleHelper.unscale(max.toDouble(), scale))
+
+            //垂直移动线条
+            lines = MathUtils.moveLine(lines, workLineEndsOffset)
+
+            var offset = getOffset(i)
+
+            //偏移线条
+            lines = MathUtils.offsetLine(lines, offset)
+
+            val linePath = MathUtils.doubleArray2Path(lines)
 
             mapview.drawPath(linePath, if (i == centerLinePosition) centerLinePaint else null)
 
             //添加阴影部分
             if (i == centerLinePosition) {
                 centerShadowPath.reset()
-                val offsetLine1 = MathUtils.offsetLine(moveLengthenLine, -workWidthPixel / 2)
-                val offsetLine2 = MathUtils.offsetLine(moveLengthenLine, workWidthPixel / 2)
+                val offsetLine1 = MathUtils.offsetLine(lines, -workWidthPixel / 2)
+                val offsetLine2 = MathUtils.offsetLine(lines, workWidthPixel / 2)
                 centerShadowPath.moveTo(offsetLine1[0].toFloat(), offsetLine1[1].toFloat())
                 centerShadowPath.lineTo(offsetLine1[2].toFloat(), offsetLine1[3].toFloat())
                 centerShadowPath.lineTo(offsetLine2[2].toFloat(), offsetLine2[3].toFloat())
@@ -365,21 +374,41 @@ class MapUtils(mapview: MapView, activity: Activity, testData: TestData) {
     }
 
     /**
+     * 获取当前位置的线条的偏移量
+     */
+    private fun getOffset(linePosition: Int): Float {
+        var offset = 0f
+        if (linePosition > 0) {
+            for (forwardOffsetLine in forwardOffsetLines) {
+                if (forwardOffsetLine.key <= linePosition) {
+                    offset += forwardOffsetLine.value
+                }
+            }
+        } else if (linePosition < 0) {
+            for (reverseOffsetLine in reverseOffsetLines) {
+                if (reverseOffsetLine.key >= linePosition) {
+                    offset += reverseOffsetLine.value
+                }
+            }
+        }
+        return offset
+    }
+
+    /**
      * 设置A-B基准线的偏移量
      */
     fun setOffset(offset: Float) {
-        datumLine = MathUtils.offsetLine(datumLine, offset)
-        mapview.moveMarker(datumLine[0], datumLine[1], ivMarkerA!!)
-        mapview.moveMarker(datumLine[2], datumLine[3], ivMarkerB!!)
-        setWorkArea(centerLinePosition, moveLine, scale)
-        if (centerLinePosition<0){
-            reverseOffsetLine.put(centerLinePosition, offset)
-
-        }else if (centerLinePosition>0){
-            forwardOffsetLine.put(centerLinePosition, offset)
-        }else{
-
+        drawWorkLine()
+        if (centerLinePosition < 0) {
+            reverseOffsetLines.put(centerLinePosition, offset)
+        } else if (centerLinePosition > 0) {
+            forwardOffsetLines.put(centerLinePosition, offset)
+        } else {
+            datumLine = MathUtils.offsetLine(datumLine, offset)
+            mapview.moveMarker(datumLine[0], datumLine[1], ivMarkerA!!)
+            mapview.moveMarker(datumLine[2], datumLine[3], ivMarkerB!!)
         }
+        drawWorkLine()
     }
 
     /**

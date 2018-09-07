@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.SplashActivity"
+            android:name=".activity.MapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
             android:screenOrientation="landscape">
@@ -72,10 +72,10 @@
             android:name=".activity.WorkHistoryMapActivity"
             android:launchMode="singleTask"
             android:screenOrientation="landscape" />
-        <activity
-            android:name=".activity.MapActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="landscape" />
+        <!--<activity-->
+            <!--android:name=".activity.MapActivity"-->
+            <!--android:launchMode="singleTask"-->
+            <!--android:screenOrientation="landscape" />-->
     </application>
 
 </manifest>

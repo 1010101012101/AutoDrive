@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bgcolor">
+
     <include
         android:id="@+id/toobar"
         layout="@layout/toobar"></include>
@@ -23,36 +24,41 @@
         app:layout_constraintTop_toBottomOf="@+id/toobar">
 
         <RadioButton
-            android:layout_weight="1"
             android:id="@+id/rb1"
             style="@style/RbStyle"
+            android:layout_weight="1"
             android:checked="true"
             android:text="左电流参数" />
 
         <RadioButton
-            android:layout_weight="1"
             android:id="@+id/rb2"
             style="@style/RbStyle"
+            android:layout_weight="1"
             android:text="右电流参数" />
 
         <RadioButton
-            android:layout_weight="1"
             android:id="@+id/rb3"
             style="@style/RbStyle"
+            android:layout_weight="1"
             android:background="@drawable/sel_rb"
             android:text="转角环参数" />
 
         <RadioButton
-            android:layout_weight="1"
             android:id="@+id/rb4"
             style="@style/RbStyle"
+            android:layout_weight="1"
             android:text="航向环参数" />
 
         <RadioButton
-            android:layout_weight="1"
             android:id="@+id/rb5"
             style="@style/RbStyle"
+            android:layout_weight="1"
             android:text="距离环参数" />
+        <RadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb6"
+            style="@style/RbStyle"
+            android:text="速度环参数" />
     </RadioGroup>
 
 
